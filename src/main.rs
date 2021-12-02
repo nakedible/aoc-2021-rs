@@ -4,6 +4,7 @@ fn main() -> Result<(), std::io::Error> {
     Ok(())
 }
 
+#[inline(never)]
 fn day1_puzzle1() -> Result<usize, std::io::Error> {
     Ok(std::fs::read_to_string("inputs/input-01")?
         .lines()
@@ -14,6 +15,7 @@ fn day1_puzzle1() -> Result<usize, std::io::Error> {
         .count())
 }
 
+#[inline(never)]
 fn day1_puzzle2() -> Result<usize, std::io::Error> {
     Ok(std::fs::read_to_string("inputs/input-01")?
         .lines()
