@@ -3,6 +3,7 @@ fn main() -> Result<(), std::io::Error> {
     println!("day 1 puzzle 2: {}", day1_puzzle2()?);
     println!("day 2 puzzle 1: {}", day2_puzzle1()?);
     println!("day 2 puzzle 2: {}", day2_puzzle2()?);
+    println!("day 3 puzzle 1: {}", day3_puzzle1()?);
     Ok(())
 }
 
@@ -69,4 +70,10 @@ fn day2_puzzle2() -> Result<usize, std::io::Error> {
             _ => panic!("invalid input"),
         });
     Ok((posh * depth) as usize)
+}
+
+#[inline(never)]
+fn day3_puzzle1() -> Result<usize, std::io::Error> {
+    let _ = std::fs::read_to_string("inputs/input-03")?.lines().count();
+    Ok(0 as usize)
 }
