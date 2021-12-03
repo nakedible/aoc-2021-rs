@@ -74,6 +74,10 @@ fn day2_puzzle2() -> Result<usize, std::io::Error> {
 
 #[inline(never)]
 fn day3_puzzle1() -> Result<usize, std::io::Error> {
-    let _ = std::fs::read_to_string("inputs/input-03")?.lines().count();
+    let data = std::fs::read_to_string("inputs/input-03")?
+        .lines()
+        .map(|l| l.chars().map(|x| x.to_digit(2).unwrap() as i64).collect::<Vec<i64>>())
+        .collect::<Vec<Vec<i64>>>();
+    let sums = data.reduce(|a, b| a.zip(&).map(|(a, b)| a + b))
     Ok(0 as usize)
 }
