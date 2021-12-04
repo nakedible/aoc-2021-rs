@@ -4,6 +4,7 @@ fn main() -> Result<(), std::io::Error> {
     println!("day 2 puzzle 1: {}", day2_puzzle1()?);
     println!("day 2 puzzle 2: {}", day2_puzzle2()?);
     println!("day 3 puzzle 1: {}", day3_puzzle1()?);
+    println!("day 3 puzzle 2: {}", day3_puzzle2()?);
     Ok(())
 }
 
@@ -78,6 +79,36 @@ fn day3_puzzle1() -> Result<usize, std::io::Error> {
         .lines()
         .map(|l| l.chars().map(|x| x.to_digit(2).unwrap() as i64).collect::<Vec<i64>>())
         .collect::<Vec<Vec<i64>>>();
-    let sums = data.reduce(|a, b| a.zip(&).map(|(a, b)| a + b))
-    Ok(0 as usize)
+    let datahalf = ((data.len() as i64)+1)/2;
+    let mut sums = vec![0; data[0].len()];
+    data.iter().for_each(|v| sums.iter_mut().zip(v).for_each(|(a, b)| *a += b));
+    let gammar = sums.iter().map(|x| if x < &datahalf { 0 } else { 1 }).fold(0, |a, v| (a << 1) + v);
+    let epsilonr = sums.iter().map(|x| if x < &datahalf { 1 } else { 0 }).fold(0, |a, v| (a << 1) + v);
+    Ok((gammar * epsilonr) as usize)
+}
+
+fn day3_filter(data: &Vec<Vec<i64>>, most: bool) -> Vec<i64> {
+    let mut curdata = data.clone();
+    let (crita, critb) = if most { (0, 1) } else { (1, 0) };
+    for i in 0..curdata[0].len() {
+        let datahalf = ((curdata.len() as i64)+1)/2;
+        let onebits = curdata.iter().fold(0, |a, v| a + v[i]);
+        let criteria = if onebits < datahalf { crita } else { critb };
+        curdata = curdata.iter().filter(|v| v[i] == criteria).cloned().collect::<Vec<Vec<i64>>>();
+        if curdata.len() == 1 {
+            break;
+        }
+    }
+    curdata[0].clone()
+}
+
+#[inline(never)]
+fn day3_puzzle2() -> Result<usize, std::io::Error> {
+    let data = std::fs::read_to_string("inputs/input-03")?
+        .lines()
+        .map(|l| l.chars().map(|x| x.to_digit(2).unwrap() as i64).collect::<Vec<i64>>())
+        .collect::<Vec<Vec<i64>>>();
+    let oxygenr = day3_filter(&data, true).iter().fold(0, |a, v| (a << 1) + v);
+    let co2r = day3_filter(&data, false).iter().fold(0, |a, v| (a << 1) + v);
+    Ok((oxygenr * co2r) as usize)
 }
