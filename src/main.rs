@@ -5,6 +5,7 @@ fn main() -> Result<(), std::io::Error> {
     println!("day 2 puzzle 2: {}", day2_puzzle2()?);
     println!("day 3 puzzle 1: {}", day3_puzzle1()?);
     println!("day 3 puzzle 2: {}", day3_puzzle2()?);
+    println!("day 4 puzzle 1: {}", day4_puzzle1()?);
     Ok(())
 }
 
@@ -111,4 +112,11 @@ fn day3_puzzle2() -> Result<usize, std::io::Error> {
     let oxygenr = day3_filter(&data, true).iter().fold(0, |a, v| (a << 1) + v);
     let co2r = day3_filter(&data, false).iter().fold(0, |a, v| (a << 1) + v);
     Ok((oxygenr * co2r) as usize)
+}
+
+#[inline(never)]
+fn day4_puzzle1() -> Result<usize, std::io::Error> {
+    let data = std::fs::read_to_string("inputs/input-03")?
+        .lines();
+    Ok(0 as usize)
 }
