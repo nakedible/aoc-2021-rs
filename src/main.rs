@@ -229,5 +229,31 @@ fn day4_puzzle2() -> Result<usize, std::io::Error> {
 }
 
 fn day5_puzzle1() -> Result<usize, std::io::Error> {
+    let data = std::fs::read_to_string("inputs/input-05")?
+        .lines()
+        .map(|l| {
+            let (a, b) = l.split_once(" -> ").unwrap();
+            let (x1s, y1s) = a.split_once(",").unwrap();
+            let (x2s, y2s) = b.split_once(",").unwrap();
+            (
+                (x1s.parse::<i64>().unwrap(), y1s.parse::<i64>().unwrap()),
+                (x2s.parse::<i64>().unwrap(), y2s.parse::<i64>().unwrap()),
+            )
+        })
+        .collect::<Vec<((i64, i64), (i64, i64))>>();
+    let mut board = [[0; 1000]; 1000];
+    for ((x1, y1), (x2, y2)) in data {
+        if x1 == x2 {
+            let (s, e) = if y2 < y1 { (y2, y1) } else { (y1, y2) };
+            for i in s..e {
+                board[i as usize][x1 as usize] += 1;
+            }
+        } else if y1 == y2 {
+            let (s, e) = if x2 < x1 { (x2, x1) } else { (x1, x2) };
+            for i in s..e {
+                board[y1 as usize][i as usize] += 1;
+            }
+        }
+    }
     Ok(0 as usize)
 }
