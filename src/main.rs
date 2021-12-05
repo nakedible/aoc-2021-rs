@@ -7,6 +7,7 @@ fn main() -> Result<(), std::io::Error> {
     println!("day 3 puzzle 2: {}", day3_puzzle2()?);
     println!("day 4 puzzle 1: {}", day4_puzzle1()?);
     println!("day 4 puzzle 2: {}", day4_puzzle2()?);
+    println!("day 5 puzzle 1: {}", day5_puzzle1()?);
     Ok(())
 }
 
@@ -225,4 +226,8 @@ fn day4_puzzle2() -> Result<usize, std::io::Error> {
         }
     }
     Ok(last_score as usize)
+}
+
+fn day5_puzzle1() -> Result<usize, std::io::Error> {
+    Ok(0 as usize)
 }
