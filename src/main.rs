@@ -7,7 +7,8 @@ fn main() -> Result<(), std::io::Error> {
     println!("day 3 puzzle 2: {}", day3_puzzle2()?);
     println!("day 4 puzzle 1: {}", day4_puzzle1()?);
     println!("day 4 puzzle 2: {}", day4_puzzle2()?);
-    println!("day 5 puzzle 1: {}", day5_puzzle1()?);
+    println!("day 5 puzzle 1: {}", day5_puzzle12(false)?);
+    println!("day 5 puzzle 1: {}", day5_puzzle12(true)?);
     Ok(())
 }
 
@@ -228,7 +229,7 @@ fn day4_puzzle2() -> Result<usize, std::io::Error> {
     Ok(last_score as usize)
 }
 
-fn day5_puzzle1() -> Result<usize, std::io::Error> {
+fn day5_puzzle12(diag: bool) -> Result<usize, std::io::Error> {
     let data = std::fs::read_to_string("inputs/input-05")?
         .lines()
         .map(|l| {
@@ -241,19 +242,32 @@ fn day5_puzzle1() -> Result<usize, std::io::Error> {
             )
         })
         .collect::<Vec<((i64, i64), (i64, i64))>>();
-    let mut board = [[0; 1000]; 1000];
+    let mut board = [[0i64; 1000]; 1000];
     for ((x1, y1), (x2, y2)) in data {
         if x1 == x2 {
             let (s, e) = if y2 < y1 { (y2, y1) } else { (y1, y2) };
-            for i in s..e {
+            for i in s..=e {
                 board[i as usize][x1 as usize] += 1;
             }
         } else if y1 == y2 {
             let (s, e) = if x2 < x1 { (x2, x1) } else { (x1, x2) };
-            for i in s..e {
+            for i in s..=e {
                 board[y1 as usize][i as usize] += 1;
+            }
+        } else if diag && (x2 - x1).abs() == (y2 - y1).abs() {
+            let xi = if x2 < x1 { -1 } else { 1 };
+            let yi = if y2 < y1 { -1 } else { 1 };
+            let (mut cx, mut cy) = (x1, y1);
+            loop {
+                board[cy as usize][cx as usize] += 1;
+                if (cx, cy) == (x2, y2) {
+                    break;
+                }
+                cx += xi;
+                cy += yi;
             }
         }
     }
-    Ok(0 as usize)
+    let result = board.iter().fold(0i64, |a, row| a + row.iter().fold(0i64, |a, col| if *col >= 2 { a + 1 } else { a }));
+    Ok(result as usize)
 }
