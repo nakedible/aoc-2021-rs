@@ -268,6 +268,10 @@ fn day5_puzzle12(diag: bool) -> Result<usize, std::io::Error> {
             }
         }
     }
-    let result = board.iter().fold(0i64, |a, row| a + row.iter().fold(0i64, |a, col| if *col >= 2 { a + 1 } else { a }));
+    let result = board.iter().fold(0i64, |a, row| {
+        a + row
+            .iter()
+            .fold(0i64, |a, col| if *col >= 2 { a + 1 } else { a })
+    });
     Ok(result as usize)
 }
