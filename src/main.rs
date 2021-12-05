@@ -167,7 +167,7 @@ fn day4_markpick(board: &mut [[i64; 5]; 5], pick: i64) -> Option<(usize, usize)>
         for (j, col) in row.iter_mut().enumerate() {
             if *col == pick {
                 *col = -1;
-                return Some((i, j))
+                return Some((i, j));
             }
         }
     }
@@ -179,7 +179,10 @@ fn day4_checkbingo(board: &[[i64; 5]; 5], i: usize, j: usize) -> bool {
 }
 
 fn day4_calcscore(board: &[[i64; 5]; 5], pick: i64) -> i64 {
-    let sums = board.iter().map(|x| x.iter().filter(|&&y| y != -1).sum::<i64>()).sum::<i64>();
+    let sums = board
+        .iter()
+        .map(|x| x.iter().filter(|&&y| y != -1).sum::<i64>())
+        .sum::<i64>();
     sums * pick
 }
 
@@ -210,7 +213,9 @@ fn day4_puzzle2() -> Result<usize, std::io::Error> {
             if let Some((i, j)) = day4_markpick(board, pick) {
                 if day4_checkbingo(board, i, j) {
                     last_score = day4_calcscore(board, pick);
-                    board.iter_mut().for_each(|row| row.iter_mut().for_each(|col| *col = -1));
+                    board
+                        .iter_mut()
+                        .for_each(|row| row.iter_mut().for_each(|col| *col = -1));
                     left -= 1;
                 }
             }
