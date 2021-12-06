@@ -10,6 +10,7 @@ fn main() -> Result<(), std::io::Error> {
     println!("day 5 puzzle 1: {}", day5_puzzle12(false)?);
     println!("day 5 puzzle 2: {}", day5_puzzle12(true)?);
     println!("day 6 puzzle 1: {}", day6_puzzle1()?);
+    println!("day 6 puzzle 2: {}", day6_puzzle2()?);
     Ok(())
 }
 
@@ -278,6 +279,47 @@ fn day5_puzzle12(diag: bool) -> Result<usize, std::io::Error> {
 }
 
 fn day6_puzzle1() -> Result<usize, std::io::Error> {
-    let data = std::fs::read_to_string("inputs/input-06")?.lines();
-    Ok(0 as usize)
+    let mut fish = std::fs::read_to_string("inputs/input-06")?
+        .lines()
+        .next()
+        .unwrap()
+        .split(",")
+        .map(|x| x.parse::<i64>().unwrap())
+        .collect::<Vec<i64>>();
+    for _ in 0..80 {
+        let mut spawns = 0;
+        for f in fish.iter_mut() {
+            *f -= 1;
+            if *f < 0 {
+                *f += 7;
+                spawns += 1;
+            }
+        }
+        for _ in 0..spawns {
+            fish.push(8);
+        }
+    }
+    Ok(fish.len() as usize)
+}
+
+fn day6_puzzle2() -> Result<usize, std::io::Error> {
+    let fish = std::fs::read_to_string("inputs/input-06")?
+        .lines()
+        .next()
+        .unwrap()
+        .split(",")
+        .map(|x| x.parse::<i64>().unwrap())
+        .collect::<Vec<i64>>();
+    let mut fishdays = [0; 9];
+    fish.iter().for_each(|&x| fishdays[x as usize] += 1);
+    for _ in 0..256 {
+        let spawns = fishdays[0];
+        for day in 1..=8 {
+            fishdays[day-1] = fishdays[day];
+        }
+        fishdays[6] += spawns;
+        fishdays[8] = spawns;
+    }
+    let total: i64 = fishdays.iter().sum();
+    Ok(total as usize)
 }
