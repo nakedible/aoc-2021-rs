@@ -8,7 +8,8 @@ fn main() -> Result<(), std::io::Error> {
     println!("day 4 puzzle 1: {}", day4_puzzle1()?);
     println!("day 4 puzzle 2: {}", day4_puzzle2()?);
     println!("day 5 puzzle 1: {}", day5_puzzle12(false)?);
-    println!("day 5 puzzle 1: {}", day5_puzzle12(true)?);
+    println!("day 5 puzzle 2: {}", day5_puzzle12(true)?);
+    println!("day 6 puzzle 1: {}", day6_puzzle1()?);
     Ok(())
 }
 
@@ -274,4 +275,9 @@ fn day5_puzzle12(diag: bool) -> Result<usize, std::io::Error> {
             .fold(0i64, |a, col| if *col >= 2 { a + 1 } else { a })
     });
     Ok(result as usize)
+}
+
+fn day6_puzzle1() -> Result<usize, std::io::Error> {
+    let data = std::fs::read_to_string("inputs/input-06")?.lines();
+    Ok(0 as usize)
 }
