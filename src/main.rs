@@ -315,7 +315,7 @@ fn day6_puzzle2() -> Result<usize, std::io::Error> {
     for _ in 0..256 {
         let spawns = fishdays[0];
         for day in 1..=8 {
-            fishdays[day-1] = fishdays[day];
+            fishdays[day - 1] = fishdays[day];
         }
         fishdays[6] += spawns;
         fishdays[8] = spawns;
