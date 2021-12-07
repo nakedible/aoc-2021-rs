@@ -11,6 +11,7 @@ fn main() -> Result<(), std::io::Error> {
     println!("day 5 puzzle 2: {}", day5_puzzle12(true)?);
     println!("day 6 puzzle 1: {}", day6_puzzle1()?);
     println!("day 6 puzzle 2: {}", day6_puzzle2()?);
+    println!("day 7 puzzle 1: {}", day7_puzzle1()?);
     Ok(())
 }
 
@@ -322,4 +323,15 @@ fn day6_puzzle2() -> Result<usize, std::io::Error> {
     }
     let total: i64 = fishdays.iter().sum();
     Ok(total as usize)
+}
+
+fn day7_puzzle1() -> Result<usize, std::io::Error> {
+    let crabs = std::fs::read_to_string("inputs/input-07")?
+        .lines()
+        .next()
+        .unwrap()
+        .split(",")
+        .map(|x| x.parse::<i64>().unwrap())
+        .collect::<Vec<i64>>();
+    Ok(crabs.len() as usize)
 }
