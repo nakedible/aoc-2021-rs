@@ -12,6 +12,7 @@ fn main() -> Result<(), std::io::Error> {
     println!("day 6 puzzle 1: {}", day6_puzzle1()?);
     println!("day 6 puzzle 2: {}", day6_puzzle2()?);
     println!("day 7 puzzle 1: {}", day7_puzzle1()?);
+    println!("day 7 puzzle 2: {}", day7_puzzle2()?);
     Ok(())
 }
 
@@ -333,5 +334,36 @@ fn day7_puzzle1() -> Result<usize, std::io::Error> {
         .split(",")
         .map(|x| x.parse::<i64>().unwrap())
         .collect::<Vec<i64>>();
-    Ok(crabs.len() as usize)
+    let minfuel = (0..2000)
+        .map(|i| crabs.iter().map(|x| (x - i).abs()).sum::<i64>())
+        .min()
+        .unwrap();
+    Ok(minfuel as usize)
+}
+
+fn day7_calccost(dist: i64) -> i64 {
+    (1..=dist).sum()
+}
+
+fn day7_puzzle2() -> Result<usize, std::io::Error> {
+    let crabs = std::fs::read_to_string("inputs/input-07")?
+        .lines()
+        .next()
+        .unwrap()
+        .split(",")
+        .map(|x| x.parse::<i64>().unwrap())
+        .collect::<Vec<i64>>();
+    let minfuel = (0..2000)
+        .map(|i| {
+            crabs
+                .iter()
+                .map(|x| {
+                    let dist = (x - i).abs();
+                    (1..=dist).sum::<i64>()
+                })
+                .sum::<i64>()
+        })
+        .min()
+        .unwrap();
+    Ok(minfuel as usize)
 }
