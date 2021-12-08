@@ -341,10 +341,6 @@ fn day7_puzzle1() -> Result<usize, std::io::Error> {
     Ok(minfuel as usize)
 }
 
-fn day7_calccost(dist: i64) -> i64 {
-    (1..=dist).sum()
-}
-
 fn day7_puzzle2() -> Result<usize, std::io::Error> {
     let crabs = std::fs::read_to_string("inputs/input-07")?
         .lines()
@@ -353,7 +349,7 @@ fn day7_puzzle2() -> Result<usize, std::io::Error> {
         .split(",")
         .map(|x| x.parse::<i64>().unwrap())
         .collect::<Vec<i64>>();
-    let minfuel = (0..2000)
+    let minfuel = (470..=475) // 0..2000
         .map(|i| {
             crabs
                 .iter()
