@@ -13,6 +13,8 @@ fn main() -> Result<(), std::io::Error> {
     println!("day 6 puzzle 2: {}", day6_puzzle2()?);
     println!("day 7 puzzle 1: {}", day7_puzzle1()?);
     println!("day 7 puzzle 2: {}", day7_puzzle2()?);
+    println!("day 8 puzzle 1: {}", day8_puzzle1()?);
+    println!("day 8 puzzle 2: {}", day8_puzzle2()?);
     Ok(())
 }
 
@@ -362,4 +364,113 @@ fn day7_puzzle2() -> Result<usize, std::io::Error> {
         .min()
         .unwrap();
     Ok(minfuel as usize)
+}
+
+fn day8_puzzle1() -> Result<usize, std::io::Error> {
+    let data = std::fs::read_to_string("inputs/input-08")?
+        .lines()
+        .map(|l| {
+            l.split(" | ")
+                .map(|p| p.split(" ").map(str::to_owned).collect::<Vec<String>>())
+                .collect::<Vec<Vec<String>>>()
+        })
+        .collect::<Vec<Vec<Vec<String>>>>();
+    let mut count = 0;
+    for row in &data {
+        for dig in &row[1] {
+            match dig.len() {
+                2 | 3 | 4 | 7 => {
+                    count += 1;
+                }
+                _ => {}
+            }
+        }
+    }
+    Ok(count as usize)
+}
+
+fn day8_ag_to_u8(a: &str) -> u8 {
+    a.chars()
+        .map(|x| match x {
+            'a' => 1,
+            'b' => 2,
+            'c' => 4,
+            'd' => 8,
+            'e' => 16,
+            'f' => 32,
+            'g' => 64,
+            _ => 127,
+        })
+        .fold(0u8, |a, b| a | b)
+}
+
+fn day8_decode_digits(digits: &Vec<u8>) -> Vec<u8> {
+    let mut sorted = digits.clone();
+    sorted.sort_by_key(|a| a.count_ones());
+    if let [one, seven, four, fives1, fives2, fives3, sixes1, sixes2, sixes3, eight] = sorted[..] {
+        let fournot = four ^ one;
+        let (three, twofive1, twofive2) = if fives1 & seven == seven {
+            (fives1, fives2, fives3)
+        } else if fives2 & seven == seven {
+            (fives2, fives1, fives3)
+        } else if fives3 & seven == seven {
+            (fives3, fives1, fives2)
+        } else {
+            panic!("invalid input");
+        };
+        let (two, five) = if twofive1 & fournot == fournot {
+            (twofive2, twofive1)
+        } else if twofive2 & fournot == fournot {
+            (twofive1, twofive2)
+        } else {
+            panic!("invalid input");
+        };
+        let (nine, zerosix1, zerosix2) = if sixes1 & four == four {
+            (sixes1, sixes2, sixes3)
+        } else if sixes2 & four == four {
+            (sixes2, sixes1, sixes3)
+        } else if sixes3 & four == four {
+            (sixes3, sixes1, sixes2)
+        } else {
+            panic!("invalid input");
+        };
+        let (zero, six) = if zerosix1 & one == one {
+            (zerosix1, zerosix2)
+        } else if zerosix2 & one == one {
+            (zerosix2, zerosix1)
+        } else {
+            panic!("invalid input");
+        };
+        return vec![zero, one, two, three, four, five, six, seven, eight, nine];
+    } else {
+        panic!("invalid input");
+    };
+}
+
+fn day8_decode_digit(digits: &Vec<u8>, val: u8) -> i64 {
+    digits.iter().position(|&x| x == val).unwrap() as i64
+}
+
+fn day8_puzzle2() -> Result<usize, std::io::Error> {
+    let data = std::fs::read_to_string("inputs/input-08")?
+        .lines()
+        .map(|l| {
+            let (digits, vals) = l.split_once(" | ").unwrap();
+            (
+                digits.split(" ").map(day8_ag_to_u8).collect::<Vec<u8>>(),
+                vals.split(" ").map(day8_ag_to_u8).collect::<Vec<u8>>(),
+            )
+        })
+        .collect::<Vec<(Vec<u8>, Vec<u8>)>>();
+    let mut sum = 0;
+    for row in &data {
+        let digits = day8_decode_digits(&row.0);
+        let value = row
+            .1
+            .iter()
+            .map(|&x| day8_decode_digit(&digits, x))
+            .fold(0, |a, v| a * 10 + v);
+        sum += value;
+    }
+    Ok(sum as usize)
 }
