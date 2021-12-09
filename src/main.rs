@@ -551,7 +551,10 @@ fn day9_puzzle2() -> Result<usize, std::io::Error> {
             }
         }
     }
-    let mut basinsizes = basins.iter().map(|(row, col)| day9_basin_size(&mut heightmap, *row, *col)).collect::<Vec<i64>>();
+    let mut basinsizes = basins
+        .iter()
+        .map(|(row, col)| day9_basin_size(&mut heightmap, *row, *col))
+        .collect::<Vec<i64>>();
     basinsizes.sort();
     basinsizes.reverse();
     let solution = basinsizes[0..3].iter().fold(1, |a, b| a * b);
