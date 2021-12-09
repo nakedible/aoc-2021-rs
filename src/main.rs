@@ -15,6 +15,7 @@ fn main() -> Result<(), std::io::Error> {
     println!("day 7 puzzle 2: {}", day7_puzzle2()?);
     println!("day 8 puzzle 1: {}", day8_puzzle1()?);
     println!("day 8 puzzle 2: {}", day8_puzzle2()?);
+    println!("day 9 puzzle 1: {}", day9_puzzle1()?);
     Ok(())
 }
 
@@ -473,4 +474,10 @@ fn day8_puzzle2() -> Result<usize, std::io::Error> {
         sum += value;
     }
     Ok(sum as usize)
+}
+
+fn day9_puzzle1() -> Result<usize, std::io::Error> {
+    let data = std::fs::read_to_string("inputs/input-09")?
+        .lines();
+    Ok(0 as usize)
 }
