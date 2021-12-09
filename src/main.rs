@@ -16,6 +16,7 @@ fn main() -> Result<(), std::io::Error> {
     println!("day 8 puzzle 1: {}", day8_puzzle1()?);
     println!("day 8 puzzle 2: {}", day8_puzzle2()?);
     println!("day 9 puzzle 1: {}", day9_puzzle1()?);
+    println!("day 9 puzzle 2: {}", day9_puzzle2()?);
     Ok(())
 }
 
@@ -476,8 +477,83 @@ fn day8_puzzle2() -> Result<usize, std::io::Error> {
     Ok(sum as usize)
 }
 
+// fn day9_get_neighbours(&heightmap: [[i8; 100]; 100], row: usize, col: usize) -> [i8; 4] {
+
+// }
+
+fn day9_safeget(heightmap: &[[i8; 100]; 100], row: i64, col: i64) -> i8 {
+    if row < 0 || row > 99 || col < 0 || col > 99 {
+        127
+    } else {
+        heightmap[row as usize][col as usize]
+    }
+}
+
 fn day9_puzzle1() -> Result<usize, std::io::Error> {
-    let data = std::fs::read_to_string("inputs/input-09")?
-        .lines();
-    Ok(0 as usize)
+    let mut heightmap = [[0i8; 100]; 100];
+    std::fs::read_to_string("inputs/input-09")?
+        .lines()
+        .enumerate()
+        .for_each(|(row, line)| {
+            line.chars().enumerate().for_each(|(col, c)| {
+                heightmap[row][col] = c.to_digit(10).unwrap() as i8;
+            })
+        });
+    let mut risks: i64 = 0;
+    for row in 0..100 {
+        for col in 0..100 {
+            let point = day9_safeget(&heightmap, row, col);
+            if point < day9_safeget(&heightmap, row + 1, col)
+                && point < day9_safeget(&heightmap, row - 1, col)
+                && point < day9_safeget(&heightmap, row, col + 1)
+                && point < day9_safeget(&heightmap, row, col - 1)
+            {
+                //println!("low point! {} {} {}", row, col, point);
+                risks += (point + 1) as i64;
+            }
+        }
+    }
+    Ok(risks as usize)
+}
+
+fn day9_basin_size(heightmap: &mut [[i8; 100]; 100], row: i64, col: i64) -> i64 {
+    if day9_safeget(heightmap, row, col) < 9 {
+        heightmap[row as usize][col as usize] = 9;
+        1 + day9_basin_size(heightmap, row + 1, col)
+            + day9_basin_size(heightmap, row - 1, col)
+            + day9_basin_size(heightmap, row, col + 1)
+            + day9_basin_size(heightmap, row, col - 1)
+    } else {
+        0
+    }
+}
+
+fn day9_puzzle2() -> Result<usize, std::io::Error> {
+    let mut heightmap = [[0i8; 100]; 100];
+    std::fs::read_to_string("inputs/input-09")?
+        .lines()
+        .enumerate()
+        .for_each(|(row, line)| {
+            line.chars().enumerate().for_each(|(col, c)| {
+                heightmap[row][col] = c.to_digit(10).unwrap() as i8;
+            })
+        });
+    let mut basins: Vec<(i64, i64)> = Vec::new();
+    for row in 0..100 {
+        for col in 0..100 {
+            let point = day9_safeget(&heightmap, row, col);
+            if point < day9_safeget(&heightmap, row + 1, col)
+                && point < day9_safeget(&heightmap, row - 1, col)
+                && point < day9_safeget(&heightmap, row, col + 1)
+                && point < day9_safeget(&heightmap, row, col - 1)
+            {
+                basins.push((row, col));
+            }
+        }
+    }
+    let mut basinsizes = basins.iter().map(|(row, col)| day9_basin_size(&mut heightmap, *row, *col)).collect::<Vec<i64>>();
+    basinsizes.sort();
+    basinsizes.reverse();
+    let solution = basinsizes[0..3].iter().fold(1, |a, b| a * b);
+    Ok(solution as usize)
 }
