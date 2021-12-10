@@ -17,6 +17,7 @@ fn main() -> Result<(), std::io::Error> {
     println!("day 8 puzzle 2: {}", day8_puzzle2()?);
     println!("day 9 puzzle 1: {}", day9_puzzle1()?);
     println!("day 9 puzzle 2: {}", day9_puzzle2()?);
+    println!("day 10 puzzle 1: {}", day10_puzzle1()?);
     Ok(())
 }
 
@@ -559,4 +560,9 @@ fn day9_puzzle2() -> Result<usize, std::io::Error> {
     basinsizes.reverse();
     let solution = basinsizes[0..3].iter().fold(1, |a, b| a * b);
     Ok(solution as usize)
+}
+
+fn day10_puzzle1() -> Result<usize, std::io::Error> {
+    std::fs::read_to_string("inputs/input-10")?;
+    Ok(0 as usize)
 }
