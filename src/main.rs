@@ -18,6 +18,7 @@ fn main() -> Result<(), std::io::Error> {
     println!("day 9 puzzle 1: {}", day9_puzzle1()?);
     println!("day 9 puzzle 2: {}", day9_puzzle2()?);
     println!("day 10 puzzle 1: {}", day10_puzzle1()?);
+    println!("day 10 puzzle 2: {}", day10_puzzle2()?);
     Ok(())
 }
 
@@ -562,7 +563,94 @@ fn day9_puzzle2() -> Result<usize, std::io::Error> {
     Ok(solution as usize)
 }
 
+fn day10_matches(a: char, b: Option<char>) -> bool {
+    match (a, b) {
+        (')', Some('(')) => true,
+        (']', Some('[')) => true,
+        ('}', Some('{')) => true,
+        ('>', Some('<')) => true,
+        _ => false,
+    }
+}
+
+fn day10_value(ch: char) -> i64 {
+    match ch {
+        ')' => 3,
+        ']' => 57,
+        '}' => 1197,
+        '>' => 25137,
+        _ => panic!("invalid input"),
+    }
+}
+
 fn day10_puzzle1() -> Result<usize, std::io::Error> {
-    std::fs::read_to_string("inputs/input-10")?;
-    Ok(0 as usize)
+    let lines = std::fs::read_to_string("inputs/input-10")?
+        .lines()
+        .map(str::to_owned)
+        .collect::<Vec<String>>();
+    let mut total: i64 = 0;
+    for line in lines {
+        let mut stack = Vec::with_capacity(100);
+        for ch in line.chars() {
+            match ch {
+                '(' | '[' | '{' | '<' => {
+                    stack.push(ch);
+                }
+                ')' | ']' | '}' | '>' => {
+                    if day10_matches(ch, stack.pop()) {
+                    } else {
+                        total += day10_value(ch);
+                        break;
+                    }
+                }
+                _ => panic!("invalid input"),
+            }
+        }
+    }
+    Ok(total as usize)
+}
+
+fn day10_score(ch: char) -> i64 {
+    match ch {
+        '(' => 1,
+        '[' => 2,
+        '{' => 3,
+        '<' => 4,
+        _ => panic!("invalid input"),
+    }
+}
+
+fn day10_puzzle2() -> Result<usize, std::io::Error> {
+    let lines = std::fs::read_to_string("inputs/input-10")?
+        .lines()
+        .map(str::to_owned)
+        .collect::<Vec<String>>();
+    let mut scores: Vec<i64> = Vec::new();
+    for line in lines {
+        let mut stack = Vec::with_capacity(100);
+        let mut error = false;
+        for ch in line.chars() {
+            match ch {
+                '(' | '[' | '{' | '<' => {
+                    stack.push(ch);
+                }
+                ')' | ']' | '}' | '>' => {
+                    if day10_matches(ch, stack.pop()) {
+                    } else {
+                        error = true;
+                        break;
+                    }
+                }
+                _ => panic!("invalid input"),
+            }
+        }
+        if error {
+            continue;
+        }
+        stack.reverse();
+        scores.push(stack.iter().fold(0, |a, &ch| (a * 5) + day10_score(ch)));
+    }
+    scores.sort();
+    let middle = scores[(scores.len() / 2)];
+    Ok(middle as usize)
 }
