@@ -1,3 +1,6 @@
+use std::cmp::{max, min};
+use std::collections::VecDeque;
+
 fn main() -> Result<(), std::io::Error> {
     println!("day 1 puzzle 1: {}", day1_puzzle1()?);
     println!("day 1 puzzle 2: {}", day1_puzzle2()?);
@@ -666,5 +669,33 @@ fn day11_puzzle1() -> Result<usize, std::io::Error> {
                 heightmap[row][col] = c.to_digit(10).unwrap() as i8;
             })
         });
-    Ok(0 as usize)
+    let mut flashq = VecDeque::with_capacity(100);
+    let mut flashes = 0i64;
+    for step in 0..100 {
+        for row in 0..10 {
+            for col in 0..10 {
+                heightmap[row][col] += 1;
+                if heightmap[row][col] == 10 {
+                    flashes += 1;
+                    flashq.push_back((row as i64, col as i64));
+                }
+            }
+        }
+        while let Some((crow, ccol)) = flashq.pop_front() {
+            heightmap[crow as usize][ccol as usize] = 0;
+            for row in max(crow - 1, 0)..=min(crow + 1, 9) {
+                for col in max(ccol - 1, 0)..=min(ccol + 1, 9) {
+                    if heightmap[row as usize][col as usize] == 0 {
+                        continue;
+                    }
+                    heightmap[row as usize][col as usize] += 1;
+                    if heightmap[row as usize][col as usize] == 10 {
+                        flashes += 1;
+                        flashq.push_back((row as i64, col as i64));
+                    }
+                }
+            }
+        }
+    }
+    Ok(flashes as usize)
 }
