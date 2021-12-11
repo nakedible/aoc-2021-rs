@@ -19,6 +19,7 @@ fn main() -> Result<(), std::io::Error> {
     println!("day 9 puzzle 2: {}", day9_puzzle2()?);
     println!("day 10 puzzle 1: {}", day10_puzzle1()?);
     println!("day 10 puzzle 2: {}", day10_puzzle2()?);
+    println!("day 11 puzzle 1: {}", day11_puzzle1()?);
     Ok(())
 }
 
@@ -653,4 +654,17 @@ fn day10_puzzle2() -> Result<usize, std::io::Error> {
     scores.sort();
     let middle = scores[(scores.len() / 2)];
     Ok(middle as usize)
+}
+
+fn day11_puzzle1() -> Result<usize, std::io::Error> {
+    let mut heightmap = [[0i8; 10]; 10];
+    std::fs::read_to_string("inputs/input-11")?
+        .lines()
+        .enumerate()
+        .for_each(|(row, line)| {
+            line.chars().enumerate().for_each(|(col, c)| {
+                heightmap[row][col] = c.to_digit(10).unwrap() as i8;
+            })
+        });
+    Ok(0 as usize)
 }
