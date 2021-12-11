@@ -23,6 +23,7 @@ fn main() -> Result<(), std::io::Error> {
     println!("day 10 puzzle 1: {}", day10_puzzle1()?);
     println!("day 10 puzzle 2: {}", day10_puzzle2()?);
     println!("day 11 puzzle 1: {}", day11_puzzle1()?);
+    println!("day 11 puzzle 2: {}", day11_puzzle2()?);
     Ok(())
 }
 
@@ -671,7 +672,7 @@ fn day11_puzzle1() -> Result<usize, std::io::Error> {
         });
     let mut flashq = VecDeque::with_capacity(100);
     let mut flashes = 0i64;
-    for step in 0..100 {
+    for _ in 0..100 {
         for row in 0..10 {
             for col in 0..10 {
                 heightmap[row][col] += 1;
@@ -698,4 +699,50 @@ fn day11_puzzle1() -> Result<usize, std::io::Error> {
         }
     }
     Ok(flashes as usize)
+}
+
+fn day11_puzzle2() -> Result<usize, std::io::Error> {
+    let mut heightmap = [[0i8; 10]; 10];
+    std::fs::read_to_string("inputs/input-11")?
+        .lines()
+        .enumerate()
+        .for_each(|(row, line)| {
+            line.chars().enumerate().for_each(|(col, c)| {
+                heightmap[row][col] = c.to_digit(10).unwrap() as i8;
+            })
+        });
+    let mut flashq = VecDeque::with_capacity(100);
+    let mut steps = 0i64;
+    loop {
+        steps += 1;
+        let mut flashes = 0i64;
+        for row in 0..10 {
+            for col in 0..10 {
+                heightmap[row][col] += 1;
+                if heightmap[row][col] == 10 {
+                    flashes += 1;
+                    flashq.push_back((row as i64, col as i64));
+                }
+            }
+        }
+        while let Some((crow, ccol)) = flashq.pop_front() {
+            heightmap[crow as usize][ccol as usize] = 0;
+            for row in max(crow - 1, 0)..=min(crow + 1, 9) {
+                for col in max(ccol - 1, 0)..=min(ccol + 1, 9) {
+                    if heightmap[row as usize][col as usize] == 0 {
+                        continue;
+                    }
+                    heightmap[row as usize][col as usize] += 1;
+                    if heightmap[row as usize][col as usize] == 10 {
+                        flashes += 1;
+                        flashq.push_back((row as i64, col as i64));
+                    }
+                }
+            }
+        }
+        if flashes == 100 {
+            break;
+        }
+    }
+    Ok(steps as usize)
 }
