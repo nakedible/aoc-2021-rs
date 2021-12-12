@@ -1,5 +1,6 @@
 use std::cmp::{max, min};
 use std::collections::VecDeque;
+use std::collections::HashMap;
 
 fn main() -> Result<(), std::io::Error> {
     println!("day 1 puzzle 1: {}", day1_puzzle1()?);
@@ -24,6 +25,7 @@ fn main() -> Result<(), std::io::Error> {
     println!("day 10 puzzle 2: {}", day10_puzzle2()?);
     println!("day 11 puzzle 1: {}", day11_puzzle1()?);
     println!("day 11 puzzle 2: {}", day11_puzzle2()?);
+    println!("day 12 puzzle 1: {}", day12_puzzle1()?);
     Ok(())
 }
 
@@ -745,4 +747,15 @@ fn day11_puzzle2() -> Result<usize, std::io::Error> {
         }
     }
     Ok(steps as usize)
+}
+
+fn day12_puzzle1() -> Result<usize, std::io::Error> {
+    let lines = std::fs::read_to_string("inputs/input-12")?
+        .lines()
+        .map(|line| {
+            let (a, b) = line.split_once("-").unwrap();
+            "".to_owned()
+        })
+        .collect::<Vec<String>>();
+    Ok(0 as usize)
 }
