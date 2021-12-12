@@ -1,6 +1,6 @@
+use petgraph::graphmap::UnGraphMap;
 use std::cmp::{max, min};
 use std::collections::VecDeque;
-use std::collections::HashMap;
 
 fn main() -> Result<(), std::io::Error> {
     println!("day 1 puzzle 1: {}", day1_puzzle1()?);
@@ -749,13 +749,30 @@ fn day11_puzzle2() -> Result<usize, std::io::Error> {
     Ok(steps as usize)
 }
 
+fn day12_countpaths<'a>(graph: &UnGraphMap<&'a str, ()>, visited: &mut Vec<&'a str>) -> i64 {
+    let mut ret = 0;
+    for neigh in graph.neighbors(visited[visited.len() - 1]) {
+        if neigh == "end" {
+            ret += 1;
+        } else if neigh.chars().all(|c| matches!(c, 'a'..='z')) && visited.contains(&neigh) {
+        } else {
+            visited.push(neigh);
+            ret += day12_countpaths(graph, visited);
+            visited.pop();
+        }
+    }
+    ret
+}
+
 fn day12_puzzle1() -> Result<usize, std::io::Error> {
-    let lines = std::fs::read_to_string("inputs/input-12")?
-        .lines()
-        .map(|line| {
-            let (a, b) = line.split_once("-").unwrap();
-            "".to_owned()
-        })
-        .collect::<Vec<String>>();
-    Ok(0 as usize)
+    let mut graph = UnGraphMap::new();
+    let file = std::fs::read_to_string("inputs/input-12")?;
+    file.lines().for_each(|line| {
+        let (a, b) = line.split_once("-").unwrap();
+        graph.add_edge(a, b, ());
+    });
+    let mut visited = Vec::new();
+    visited.push("start");
+    let answer = day12_countpaths(&graph, &mut visited);
+    Ok(answer as usize)
 }
