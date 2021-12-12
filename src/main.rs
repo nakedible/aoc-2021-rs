@@ -26,6 +26,7 @@ fn main() -> Result<(), std::io::Error> {
     println!("day 11 puzzle 1: {}", day11_puzzle1()?);
     println!("day 11 puzzle 2: {}", day11_puzzle2()?);
     println!("day 12 puzzle 1: {}", day12_puzzle1()?);
+    println!("day 12 puzzle 2: {}", day12_puzzle2()?);
     Ok(())
 }
 
@@ -774,5 +775,42 @@ fn day12_puzzle1() -> Result<usize, std::io::Error> {
     let mut visited = Vec::new();
     visited.push("start");
     let answer = day12_countpaths(&graph, &mut visited);
+    Ok(answer as usize)
+}
+
+fn day12_countpaths2<'a>(graph: &UnGraphMap<&'a str, ()>, visited: &mut Vec<&'a str>, double: bool) -> i64 {
+    let mut ret = 0;
+    for neigh in graph.neighbors(visited[visited.len() - 1]) {
+        if neigh == "end" {
+            ret += 1;
+        } else if neigh == "start" {
+            continue;
+        } else {
+            let mut dubbel = double;
+            if neigh.chars().all(|c| matches!(c, 'a'..='z')) && visited.contains(&neigh) {
+                if double {
+                    continue;
+                } else {
+                    dubbel = true;
+                }
+            }
+            visited.push(neigh);
+            ret += day12_countpaths2(graph, visited, dubbel);
+            visited.pop();
+        }
+    }
+    ret
+}
+
+fn day12_puzzle2() -> Result<usize, std::io::Error> {
+    let mut graph = UnGraphMap::new();
+    let file = std::fs::read_to_string("inputs/input-12")?;
+    file.lines().for_each(|line| {
+        let (a, b) = line.split_once("-").unwrap();
+        graph.add_edge(a, b, ());
+    });
+    let mut visited = Vec::new();
+    visited.push("start");
+    let answer = day12_countpaths2(&graph, &mut visited, false);
     Ok(answer as usize)
 }
