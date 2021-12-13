@@ -27,6 +27,8 @@ fn main() -> Result<(), std::io::Error> {
     println!("day 11 puzzle 2: {}", day11_puzzle2()?);
     println!("day 12 puzzle 1: {}", day12_puzzle1()?);
     println!("day 12 puzzle 2: {}", day12_puzzle2()?);
+    println!("day 13 puzzle 1: {}", day13_puzzle1()?);
+    println!("day 13 puzzle 2: {}", day13_puzzle2()?);
     Ok(())
 }
 
@@ -778,7 +780,11 @@ fn day12_puzzle1() -> Result<usize, std::io::Error> {
     Ok(answer as usize)
 }
 
-fn day12_countpaths2<'a>(graph: &UnGraphMap<&'a str, ()>, visited: &mut Vec<&'a str>, double: bool) -> i64 {
+fn day12_countpaths2<'a>(
+    graph: &UnGraphMap<&'a str, ()>,
+    visited: &mut Vec<&'a str>,
+    double: bool,
+) -> i64 {
     let mut ret = 0;
     for neigh in graph.neighbors(visited[visited.len() - 1]) {
         if neigh == "end" {
@@ -813,4 +819,87 @@ fn day12_puzzle2() -> Result<usize, std::io::Error> {
     visited.push("start");
     let answer = day12_countpaths2(&graph, &mut visited, false);
     Ok(answer as usize)
+}
+
+fn day13_fold(points: &mut Vec<(i64, i64)>, x: bool, val: i64) {
+    for p in points {
+        if x {
+            if p.0 < val {
+                continue;
+            } else {
+                *p = (val - (p.0 - val), p.1);
+            }
+        } else {
+            if p.1 < val {
+                continue;
+            } else {
+                *p = (p.0, val - (p.1 - val));
+            }
+        }
+    }
+}
+
+fn day13_puzzle1() -> Result<usize, std::io::Error> {
+    let file = std::fs::read_to_string("inputs/input-13")?;
+    let (points, splits) = file.split_once("\n\n").unwrap();
+    let mut points = points
+        .lines()
+        .map(|l| {
+            let (x, y) = l.split_once(",").unwrap();
+            (x.parse::<i64>().unwrap(), y.parse::<i64>().unwrap())
+        })
+        .collect::<Vec<(i64, i64)>>();
+    let splits = splits
+        .lines()
+        .map(|l| {
+            if !l.starts_with("fold along ") {
+                panic!("invalid input");
+            }
+            let (dir, val) = l[11..].split_once("=").unwrap();
+            (dir == "x", val.parse::<i64>().unwrap())
+        })
+        .collect::<Vec<(bool, i64)>>();
+    let (x, val) = splits.iter().next().unwrap();
+    day13_fold(&mut points, *x, *val);
+    points.sort();
+    points.dedup();
+    Ok(points.len() as usize)
+}
+
+fn day13_puzzle2() -> Result<usize, std::io::Error> {
+    let file = std::fs::read_to_string("inputs/input-13")?;
+    let (points, splits) = file.split_once("\n\n").unwrap();
+    let mut points = points
+        .lines()
+        .map(|l| {
+            let (x, y) = l.split_once(",").unwrap();
+            (x.parse::<i64>().unwrap(), y.parse::<i64>().unwrap())
+        })
+        .collect::<Vec<(i64, i64)>>();
+    let splits = splits
+        .lines()
+        .map(|l| {
+            if !l.starts_with("fold along ") {
+                panic!("invalid input");
+            }
+            let (dir, val) = l[11..].split_once("=").unwrap();
+            (dir == "x", val.parse::<i64>().unwrap())
+        })
+        .collect::<Vec<(bool, i64)>>();
+    for (x, val) in splits {
+        day13_fold(&mut points, x, val);
+        points.sort();
+        points.dedup();
+    }
+    let mut output = [[false; 40]; 6];
+    for (x, y) in points {
+        output[y as usize][x as usize] = true;
+    }
+    for row in output {
+        for col in row {
+            print!("{}", if col { "*" } else { " " });
+        }
+        println!("");
+    }
+    Ok(0 as usize)
 }
