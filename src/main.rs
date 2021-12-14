@@ -1,5 +1,6 @@
 use petgraph::graphmap::UnGraphMap;
 use std::cmp::{max, min};
+use std::collections::HashMap;
 use std::collections::VecDeque;
 
 fn main() -> Result<(), std::io::Error> {
@@ -29,6 +30,8 @@ fn main() -> Result<(), std::io::Error> {
     println!("day 12 puzzle 2: {}", day12_puzzle2()?);
     println!("day 13 puzzle 1: {}", day13_puzzle1()?);
     println!("day 13 puzzle 2: {}", day13_puzzle2()?);
+    println!("day 14 puzzle 1: {}", day14_puzzle1()?);
+    println!("day 14 puzzle 2: {}", day14_puzzle2()?);
     Ok(())
 }
 
@@ -902,4 +905,69 @@ fn day13_puzzle2() -> Result<usize, std::io::Error> {
         println!("");
     }
     Ok(0 as usize)
+}
+
+fn day14_puzzle1() -> Result<usize, std::io::Error> {
+    let file = std::fs::read_to_string("inputs/input-14")?;
+    let (start, rules) = file.split_once("\n\n").unwrap();
+    let rules = rules
+        .lines()
+        .map(|l| {
+            let (s, f) = l.split_once(" -> ").unwrap();
+            (s.as_bytes(), f.as_bytes()[0])
+        })
+        .collect::<HashMap<&[u8], u8>>();
+    let mut cur = start.as_bytes().to_owned();
+    for _ in 0..10 {
+        let mut next = Vec::with_capacity((cur.len() * 2) - 1);
+        next.push(cur[0]);
+        for s in cur.windows(2) {
+            next.push(*rules.get(s).unwrap());
+            next.push(s[1]);
+        }
+        cur = next;
+    }
+    let mut counts = HashMap::new();
+    for c in &cur {
+        *counts.entry(c).or_insert(0) += 1;
+    }
+    let response = *counts.values().max().unwrap() - *counts.values().min().unwrap();
+    Ok(response as usize)
+}
+
+fn day14_puzzle2() -> Result<usize, std::io::Error> {
+    let file = std::fs::read_to_string("inputs/input-14")?;
+    let (start, rules) = file.split_once("\n\n").unwrap();
+    let rules = rules
+        .lines()
+        .map(|l| {
+            let (s, f) = l.split_once(" -> ").unwrap();
+            (
+                s.as_bytes()[0..2].try_into().expect("invalid input"),
+                f.as_bytes()[0],
+            )
+        })
+        .collect::<HashMap<[u8; 2], u8>>();
+    let mut pairs: HashMap<[u8; 2], i64> = HashMap::new();
+    for s in start.as_bytes().windows(2) {
+        *pairs
+            .entry(s[0..2].try_into().expect("invalid input"))
+            .or_insert(0) += 1;
+    }
+    for _ in 0..40 {
+        let mut next: HashMap<[u8; 2], i64> = HashMap::new();
+        for (pair, count) in pairs {
+            let add = rules.get(&pair).unwrap();
+            *next.entry([pair[0], *add]).or_insert(0) += count;
+            *next.entry([*add, pair[1]]).or_insert(0) += count;
+        }
+        pairs = next;
+    }
+    let mut counts = HashMap::new();
+    counts.insert(start.as_bytes()[0], 1);
+    for (pair, count) in pairs {
+        *counts.entry(pair[1]).or_insert(0) += count;
+    }
+    let response = *counts.values().max().unwrap() - *counts.values().min().unwrap();
+    Ok(response as usize)
 }
