@@ -1,3 +1,4 @@
+use pathfinding::directed::astar::astar;
 use petgraph::graphmap::UnGraphMap;
 use std::cmp::{max, min};
 use std::collections::HashMap;
@@ -32,6 +33,8 @@ fn main() -> Result<(), std::io::Error> {
     println!("day 13 puzzle 2: {}", day13_puzzle2()?);
     println!("day 14 puzzle 1: {}", day14_puzzle1()?);
     println!("day 14 puzzle 2: {}", day14_puzzle2()?);
+    println!("day 15 puzzle 1: {}", day15_puzzle1()?);
+    println!("day 15 puzzle 2: {}", day15_puzzle2()?);
     Ok(())
 }
 
@@ -970,4 +973,90 @@ fn day14_puzzle2() -> Result<usize, std::io::Error> {
     }
     let response = *counts.values().max().unwrap() - *counts.values().min().unwrap();
     Ok(response as usize)
+}
+
+fn day15_neighbours<const L: usize>(
+    map: &[[i8; L]; L],
+    pos: &(i64, i64),
+) -> Vec<((i64, i64), i64)> {
+    let mut ret = Vec::new();
+    for (row, col) in [
+        (pos.1 - 1, pos.0),
+        (pos.1 + 1, pos.0),
+        (pos.1, pos.0 - 1),
+        (pos.1, pos.0 + 1),
+    ] {
+        if row < 0 || row >= map.len() as i64 || col < 0 || col >= map[0].len() as i64 {
+            continue;
+        }
+        ret.push(((col, row), map[row as usize][col as usize] as i64));
+    }
+    ret
+}
+
+fn day15_puzzle1() -> Result<usize, std::io::Error> {
+    let mut dangermap = [[0i8; 100]; 100];
+    std::fs::read_to_string("inputs/input-15")?
+        .lines()
+        .enumerate()
+        .for_each(|(row, line)| {
+            line.chars().enumerate().for_each(|(col, c)| {
+                dangermap[row][col] = c.to_digit(10).unwrap() as i8;
+            })
+        });
+    let (_path, cost) = astar(
+        &(0i64, 0i64),
+        |p| day15_neighbours(&dangermap, p),
+        |(x, y)| i64::abs(99 - x) + i64::abs(99 - y),
+        |p| *p == (99, 99),
+    )
+    .unwrap();
+    Ok(cost as usize)
+}
+
+fn day15_dupmap(
+    map: &mut [[i8; 500]; 500],
+    srcreprow: i64,
+    srcrepcol: i64,
+    dstreprow: i64,
+    dstrepcol: i64,
+) {
+    for row in 0..100 {
+        for col in 0..100 {
+            map[(dstreprow * 100 + row) as usize][(dstrepcol * 100 + col) as usize] =
+                if map[(srcreprow * 100 + row) as usize][(srcrepcol * 100 + col) as usize] == 9 {
+                    1
+                } else {
+                    map[(srcreprow * 100 + row) as usize][(srcrepcol * 100 + col) as usize] + 1
+                };
+        }
+    }
+}
+
+fn day15_puzzle2() -> Result<usize, std::io::Error> {
+    let mut dangermap = [[0i8; 500]; 500];
+    std::fs::read_to_string("inputs/input-15")?
+        .lines()
+        .enumerate()
+        .for_each(|(row, line)| {
+            line.chars().enumerate().for_each(|(col, c)| {
+                dangermap[row][col] = c.to_digit(10).unwrap() as i8;
+            })
+        });
+    for reprow in 1..5 {
+        day15_dupmap(&mut dangermap, reprow - 1, 0, reprow, 0);
+    }
+    for reprow in 0..5 {
+        for repcol in 1..5 {
+            day15_dupmap(&mut dangermap, reprow, repcol - 1, reprow, repcol);
+        }
+    }
+    let (_path, cost) = astar(
+        &(0i64, 0i64),
+        |p| day15_neighbours(&dangermap, p),
+        |(x, y)| i64::abs(499 - x) + i64::abs(499 - y),
+        |p| *p == (499, 499),
+    )
+    .unwrap();
+    Ok(cost as usize)
 }
