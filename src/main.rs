@@ -1063,8 +1063,7 @@ fn day15_puzzle2() -> Result<usize, std::io::Error> {
     Ok(cost as usize)
 }
 
-fn day16_readnum(it: &mut impl Iterator<Item = char>, n: usize) -> Option<i64>
-{
+fn day16_readnum(it: &mut impl Iterator<Item = char>, n: usize) -> Option<i64> {
     let num = it.take(n).collect::<String>();
     if num.len() == n {
         Some(i64::from_str_radix(&num, 2).unwrap())
@@ -1108,8 +1107,7 @@ fn day16_puzzle1() -> Result<usize, std::io::Error> {
     Ok(vertotal as usize)
 }
 
-fn day16_parsesub(it: &mut impl Iterator<Item = char>) -> Vec<i64>
-{
+fn day16_parsesub(it: &mut impl Iterator<Item = char>) -> Vec<i64> {
     let mut ret = Vec::new();
     if day16_readnum(it, 1).unwrap() == 0 {
         let len = day16_readnum(it, 15).unwrap();
@@ -1131,8 +1129,7 @@ fn day16_parsesub(it: &mut impl Iterator<Item = char>) -> Vec<i64>
     ret
 }
 
-fn day16_parsenum(it: &mut impl Iterator<Item = char>) -> i64
-{
+fn day16_parsenum(it: &mut impl Iterator<Item = char>) -> i64 {
     let mut ret = 0;
     loop {
         let num = day16_readnum(it, 5).unwrap();
@@ -1144,8 +1141,7 @@ fn day16_parsenum(it: &mut impl Iterator<Item = char>) -> i64
     ret
 }
 
-fn day16_compute(it: &mut impl Iterator<Item=char>) -> Option<i64>
-{
+fn day16_compute(it: &mut impl Iterator<Item = char>) -> Option<i64> {
     let version = day16_readnum(it, 3);
     if version.is_none() {
         return None;
