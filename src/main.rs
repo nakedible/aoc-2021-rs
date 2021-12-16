@@ -35,6 +35,8 @@ fn main() -> Result<(), std::io::Error> {
     println!("day 14 puzzle 2: {}", day14_puzzle2()?);
     println!("day 15 puzzle 1: {}", day15_puzzle1()?);
     println!("day 15 puzzle 2: {}", day15_puzzle2()?);
+    println!("day 16 puzzle 1: {}", day16_puzzle1()?);
+    println!("day 16 puzzle 2: {}", day16_puzzle2()?);
     Ok(())
 }
 
@@ -1059,4 +1061,149 @@ fn day15_puzzle2() -> Result<usize, std::io::Error> {
     )
     .unwrap();
     Ok(cost as usize)
+}
+
+fn day16_readnum(it: &mut impl Iterator<Item = char>, n: usize) -> Option<i64>
+{
+    let num = it.take(n).collect::<String>();
+    if num.len() == n {
+        Some(i64::from_str_radix(&num, 2).unwrap())
+    } else {
+        None
+    }
+}
+
+fn day16_puzzle1() -> Result<usize, std::io::Error> {
+    let bits = std::fs::read_to_string("inputs/input-16")?
+        .chars()
+        .map(|c| format!("{:04b}", c.to_digit(16).unwrap()))
+        .collect::<String>();
+    let mut chars = bits.chars();
+    let mut vertotal = 0;
+    loop {
+        let version = day16_readnum(&mut chars, 3);
+        if version.is_none() {
+            break;
+        }
+        vertotal += version.unwrap();
+        let typ = day16_readnum(&mut chars, 3);
+        if typ.is_none() {
+            break;
+        }
+        if typ.unwrap() == 4 {
+            loop {
+                let num = day16_readnum(&mut chars, 5).unwrap();
+                if num & 16 == 0 {
+                    break;
+                }
+            }
+        } else {
+            if day16_readnum(&mut chars, 1).unwrap() == 0 {
+                let _ = day16_readnum(&mut chars, 15).unwrap();
+            } else {
+                let _ = day16_readnum(&mut chars, 11).unwrap();
+            }
+        }
+    }
+    Ok(vertotal as usize)
+}
+
+fn day16_parsesub(it: &mut impl Iterator<Item = char>) -> Vec<i64>
+{
+    let mut ret = Vec::new();
+    if day16_readnum(it, 1).unwrap() == 0 {
+        let len = day16_readnum(it, 15).unwrap();
+        let substr = it.take(len as usize).collect::<String>();
+        let mut subs = substr.chars();
+        loop {
+            if let Some(val) = day16_compute(&mut subs) {
+                ret.push(val);
+            } else {
+                break;
+            }
+        }
+    } else {
+        let num = day16_readnum(it, 11).unwrap();
+        for _ in 0..num {
+            ret.push(day16_compute(it).unwrap());
+        }
+    }
+    ret
+}
+
+fn day16_parsenum(it: &mut impl Iterator<Item = char>) -> i64
+{
+    let mut ret = 0;
+    loop {
+        let num = day16_readnum(it, 5).unwrap();
+        ret = (ret << 4) | (num & 0xf);
+        if num & 16 == 0 {
+            break;
+        }
+    }
+    ret
+}
+
+fn day16_compute(it: &mut impl Iterator<Item=char>) -> Option<i64>
+{
+    let version = day16_readnum(it, 3);
+    if version.is_none() {
+        return None;
+    }
+    let typ = day16_readnum(it, 3);
+    if typ.is_none() {
+        return None;
+    }
+    let ret = match typ.unwrap() {
+        0 => day16_parsesub(it).iter().sum::<i64>(),
+        1 => day16_parsesub(it).iter().product::<i64>(),
+        2 => *day16_parsesub(it).iter().min().unwrap(),
+        3 => *day16_parsesub(it).iter().max().unwrap(),
+        4 => day16_parsenum(it),
+        5 => {
+            if let [a, b] = day16_parsesub(it)[..] {
+                if a > b {
+                    1
+                } else {
+                    0
+                }
+            } else {
+                panic!("invalid input")
+            }
+        }
+        6 => {
+            if let [a, b] = day16_parsesub(it)[..] {
+                if a < b {
+                    1
+                } else {
+                    0
+                }
+            } else {
+                panic!("invalid input")
+            }
+        }
+        7 => {
+            if let [a, b] = day16_parsesub(it)[..] {
+                if a == b {
+                    1
+                } else {
+                    0
+                }
+            } else {
+                panic!("invalid input")
+            }
+        }
+        _ => panic!("invalid input"),
+    };
+    Some(ret)
+}
+
+fn day16_puzzle2() -> Result<usize, std::io::Error> {
+    let bits = std::fs::read_to_string("inputs/input-16")?
+        .chars()
+        .map(|c| format!("{:04b}", c.to_digit(16).unwrap()))
+        .collect::<String>();
+    let mut chars = bits.chars();
+    let ret = day16_compute(&mut chars).unwrap();
+    Ok(ret as usize)
 }
