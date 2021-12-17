@@ -37,6 +37,7 @@ fn main() -> Result<(), std::io::Error> {
     println!("day 15 puzzle 2: {}", day15_puzzle2()?);
     println!("day 16 puzzle 1: {}", day16_puzzle1()?);
     println!("day 16 puzzle 2: {}", day16_puzzle2()?);
+    println!("day 17 puzzle 1: {}", day17_puzzle1()?);
     Ok(())
 }
 
@@ -1202,4 +1203,8 @@ fn day16_puzzle2() -> Result<usize, std::io::Error> {
     let mut chars = bits.chars();
     let ret = day16_compute(&mut chars).unwrap();
     Ok(ret as usize)
+}
+
+fn day17_puzzle1() -> Result<usize, std::io::Error> {
+    Ok(0 as usize)
 }
