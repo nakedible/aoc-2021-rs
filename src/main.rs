@@ -1205,6 +1205,70 @@ fn day16_puzzle2() -> Result<usize, std::io::Error> {
     Ok(ret as usize)
 }
 
+fn day17_xvals(xmin: i64, xmax: i64) -> Vec<i64> {
+    let mut ret = Vec::new();
+    for v in 1..=xmax+1 {
+        let mut xpos = 0;
+        let mut xvel = v;
+        loop {
+            xpos += xvel;
+            if xpos > xmax {
+                break;
+            } else if xpos >= xmin {
+                ret.push(v);
+                break;
+            } else if xvel == 1 {
+                break;
+            }
+            xvel -= 1;
+        }
+    }
+    ret
+}
+
+fn day17_hits(xvel: i64, yvel: i64, xmin: i64, ymin: i64, xmax: i64, ymax: i64) -> Option<i64> {
+    let (mut xpos, mut ypos) = (0i64, 0i64);
+    let (mut xvel, mut yvel) = (xvel, yvel);
+    let mut yposmax = 0;
+    for _ in 0..1000 {
+        xpos += xvel;
+        ypos += yvel;
+        if xvel > 0 {
+            xvel -= 1;
+        }
+        yvel -= 1;
+        if ypos > yposmax {
+            yposmax = ypos;
+        }
+        if xpos >= xmin && xpos <= xmax && ypos >= ymin && ypos <= ymax {
+            return Some(yposmax);
+        } else if xpos > xmax || ypos < ymin {
+            return None;
+        }
+    }
+    panic!("should not get here")
+}
+
 fn day17_puzzle1() -> Result<usize, std::io::Error> {
-    Ok(0 as usize)
+    let data = std::fs::read_to_string("inputs/input-17")?;
+    let (xs, ys) = data.split_once(", ").unwrap();
+    let (_, xs) = xs.split_once("=").unwrap();
+    let (_, ys) = ys.split_once("=").unwrap();
+    let (xmin, xmax) = xs.split_once("..").unwrap();
+    let (ymin, ymax) = ys.split_once("..").unwrap();
+    let (xmin, xmax): (i64, i64) = (xmin.parse().unwrap(), xmax.parse().unwrap());
+    let (ymin, ymax): (i64, i64) = (ymin.parse().unwrap(), ymax.parse().unwrap());
+
+    let xvals = day17_xvals(xmin, xmax);
+    let mut max = 0;
+    for xvel in xvals {
+        for yvel in 0..100 {
+            if let Some(xposmax) = day17_hits(xvel, yvel, xmin, ymin, xmax, ymax) {
+                if xposmax > max {
+                    max = xposmax;
+                }
+            }
+        }
+    }
+    Ok(max as usize)
 }
