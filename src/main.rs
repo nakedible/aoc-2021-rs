@@ -38,6 +38,7 @@ fn main() -> Result<(), std::io::Error> {
     println!("day 16 puzzle 1: {}", day16_puzzle1()?);
     println!("day 16 puzzle 2: {}", day16_puzzle2()?);
     println!("day 17 puzzle 1: {}", day17_puzzle1()?);
+    println!("day 17 puzzle 2: {}", day17_puzzle2()?);
     Ok(())
 }
 
@@ -1271,4 +1272,26 @@ fn day17_puzzle1() -> Result<usize, std::io::Error> {
         }
     }
     Ok(max as usize)
+}
+
+fn day17_puzzle2() -> Result<usize, std::io::Error> {
+    let data = std::fs::read_to_string("inputs/input-17")?;
+    let (xs, ys) = data.split_once(", ").unwrap();
+    let (_, xs) = xs.split_once("=").unwrap();
+    let (_, ys) = ys.split_once("=").unwrap();
+    let (xmin, xmax) = xs.split_once("..").unwrap();
+    let (ymin, ymax) = ys.split_once("..").unwrap();
+    let (xmin, xmax): (i64, i64) = (xmin.parse().unwrap(), xmax.parse().unwrap());
+    let (ymin, ymax): (i64, i64) = (ymin.parse().unwrap(), ymax.parse().unwrap());
+
+    let xvals = day17_xvals(xmin, xmax);
+    let mut count = 0;
+    for xvel in xvals {
+        for yvel in ymin - 1..100 {
+            if day17_hits(xvel, yvel, xmin, ymin, xmax, ymax).is_some() {
+                count += 1;
+            }
+        }
+    }
+    Ok(count as usize)
 }
