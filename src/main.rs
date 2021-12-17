@@ -1207,7 +1207,7 @@ fn day16_puzzle2() -> Result<usize, std::io::Error> {
 
 fn day17_xvals(xmin: i64, xmax: i64) -> Vec<i64> {
     let mut ret = Vec::new();
-    for v in 1..=xmax+1 {
+    for v in 1..=xmax + 1 {
         let mut xpos = 0;
         let mut xvel = v;
         loop {
