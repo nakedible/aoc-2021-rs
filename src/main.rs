@@ -39,6 +39,8 @@ fn main() -> Result<(), std::io::Error> {
     println!("day 16 puzzle 2: {}", day16_puzzle2()?);
     println!("day 17 puzzle 1: {}", day17_puzzle1()?);
     println!("day 17 puzzle 2: {}", day17_puzzle2()?);
+    println!("day 18 puzzle 1: {}", day18_puzzle1()?);
+    println!("day 18 puzzle 2: {}", day18_puzzle2()?);
     Ok(())
 }
 
@@ -1294,4 +1296,167 @@ fn day17_puzzle2() -> Result<usize, std::io::Error> {
         }
     }
     Ok(count as usize)
+}
+
+#[derive(Clone, Debug)]
+enum Sn {
+    Value(i64),
+    Pair(Box<Sn>, Box<Sn>),
+}
+
+fn day18_parse(s: &str) -> (Box<Sn>, &str) {
+    match s.chars().next().unwrap() {
+        '[' => {
+            let (a, tail) = day18_parse(&s[1..]);
+            assert_eq!(tail.chars().next().unwrap(), ',');
+            let (b, tail) = day18_parse(&tail[1..]);
+            assert_eq!(tail.chars().next().unwrap(), ']');
+            (Box::new(Sn::Pair(a, b)), &tail[1..])
+        }
+        v @ '0'..='9' => (Box::new(Sn::Value(v.to_digit(10).unwrap().into())), &s[1..]),
+        _ => panic!("invalid input"),
+    }
+}
+
+fn day18_mag(sn: &Box<Sn>) -> i64 {
+    match &**sn {
+        Sn::Value(v) => *v,
+        Sn::Pair(a, b) => (day18_mag(&a) * 3) + (day18_mag(&b) * 2),
+    }
+}
+
+fn day18_addleft(sn: Box<Sn>, x: i64) -> Box<Sn> {
+    match *sn {
+        Sn::Value(v) => Box::new(Sn::Value(v + x)),
+        Sn::Pair(a, b) => Box::new(Sn::Pair(a, day18_addleft(b, x))),
+    }
+}
+
+fn day18_addright(sn: Box<Sn>, x: i64) -> Box<Sn> {
+    match *sn {
+        Sn::Value(v) => Box::new(Sn::Value(v + x)),
+        Sn::Pair(a, b) => Box::new(Sn::Pair(day18_addright(a, x), b)),
+    }
+}
+
+fn day18_getval(sn: &Box<Sn>) -> i64 {
+    if let Sn::Value(v) = **sn {
+        v
+    } else {
+        panic!("invalid input")
+    }
+}
+
+fn day18_explode(sn: Box<Sn>, level: i64) -> (Box<Sn>, bool, Option<i64>, Option<i64>) {
+    match *sn {
+        Sn::Value(v) => (Box::new(Sn::Value(v)), false, None, None),
+        Sn::Pair(a, b) => {
+            if level >= 4 {
+                let a = day18_getval(&a);
+                let b = day18_getval(&b);
+                (Box::new(Sn::Value(0)), true, Some(a), Some(b))
+            } else {
+                let (a, e, lo, ro) = day18_explode(a, level + 1);
+                if e {
+                    let b = if let Some(r) = ro {
+                        day18_addright(b, r)
+                    } else {
+                        b
+                    };
+                    (Box::new(Sn::Pair(a, b)), e, lo, None)
+                } else {
+                    let (b, e, lo, ro) = day18_explode(b, level + 1);
+                    if e {
+                        let a = if let Some(l) = lo {
+                            day18_addleft(a, l)
+                        } else {
+                            a
+                        };
+                        (Box::new(Sn::Pair(a, b)), e, None, ro)
+                    } else {
+                        (Box::new(Sn::Pair(a, b)), false, None, None)
+                    }
+                }
+            }
+        }
+    }
+}
+
+fn day18_split(sn: Box<Sn>) -> (Box<Sn>, bool) {
+    match *sn {
+        Sn::Value(v) => {
+            if v > 9 {
+                (
+                    Box::new(Sn::Pair(
+                        Box::new(Sn::Value(v / 2)),
+                        Box::new(Sn::Value((v + 1) / 2)),
+                    )),
+                    true,
+                )
+            } else {
+                (Box::new(Sn::Value(v)), false)
+            }
+        }
+        Sn::Pair(a, b) => {
+            let (a, s) = day18_split(a);
+            if s {
+                (Box::new(Sn::Pair(a, b)), s)
+            } else {
+                let (b, s) = day18_split(b);
+                (Box::new(Sn::Pair(a, b)), s)
+            }
+        }
+    }
+}
+
+fn day18_reduce(sn: Box<Sn>) -> Box<Sn> {
+    let mut ret = sn;
+    loop {
+        let (n, e, _, _) = day18_explode(ret, 0);
+        ret = n;
+        if e {
+            continue;
+        }
+        let (n, s) = day18_split(ret);
+        ret = n;
+        if s {
+            continue;
+        }
+        break;
+    }
+    ret
+}
+
+fn day18_add(a: Box<Sn>, b: Box<Sn>) -> Box<Sn> {
+    day18_reduce(Box::new(Sn::Pair(a, b)))
+}
+
+fn day18_puzzle1() -> Result<usize, std::io::Error> {
+    let data = std::fs::read_to_string("inputs/input-18")?
+        .lines()
+        .map(|l| day18_parse(l).0)
+        .collect::<Vec<Box<Sn>>>();
+    let sum = data.into_iter().reduce(day18_add).unwrap();
+    let ret = day18_mag(&sum);
+    Ok(ret as usize)
+}
+
+fn day18_puzzle2() -> Result<usize, std::io::Error> {
+    let data = std::fs::read_to_string("inputs/input-18")?
+        .lines()
+        .map(|l| day18_parse(l).0)
+        .collect::<Vec<Box<Sn>>>();
+    let ret = data
+        .iter()
+        .enumerate()
+        .map(|(i, a)| {
+            data[i..]
+                .iter()
+                .map(|b| day18_mag(&day18_add(a.clone(), b.clone())))
+                .max()
+                .unwrap()
+        })
+        .max()
+        .unwrap();
+    Ok(ret as usize)
 }
