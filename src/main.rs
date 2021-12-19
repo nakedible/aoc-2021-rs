@@ -41,6 +41,8 @@ fn main() -> Result<(), std::io::Error> {
     println!("day 17 puzzle 2: {}", day17_puzzle2()?);
     println!("day 18 puzzle 1: {}", day18_puzzle1()?);
     println!("day 18 puzzle 2: {}", day18_puzzle2()?);
+    println!("day 19 puzzle 1: {}", day19_puzzle1()?);
+    println!("day 19 puzzle 2: {}", day19_puzzle2()?);
     Ok(())
 }
 
@@ -1459,4 +1461,213 @@ fn day18_puzzle2() -> Result<usize, std::io::Error> {
         .max()
         .unwrap();
     Ok(ret as usize)
+}
+
+fn day19_read_data(filename: &str) -> Result<Vec<Vec<(i64, i64, i64)>>, std::io::Error> {
+    let data = std::fs::read_to_string(filename)?
+        .split("\n\n")
+        .enumerate()
+        .map(|(_i, scanner)| {
+            let (_, scanner) = scanner.split_once("\n").unwrap();
+            scanner
+                .lines()
+                .map(|l| {
+                    let mut l = l.split(",").map(|c| c.parse::<i64>().unwrap());
+                    (l.next().unwrap(), l.next().unwrap(), l.next().unwrap())
+                })
+                .collect()
+        })
+        .collect();
+    Ok(data)
+}
+
+fn day19_per_coord(p: i64, (x, y, z): (i64, i64, i64)) -> (i64, i64, i64) {
+    match p {
+        0 => (x, y, z),
+        1 => (x, z, -y),
+        2 => (x, -y, -z),
+        3 => (x, -z, y),
+        4 => (y, -x, z),
+        5 => (y, x, z),
+        6 => (y, x, -z),
+        7 => (y, -z, -x),
+        8 => (-x, -y, z),
+        9 => (-x, -z, -y),
+        10 => (-x, y, -z),
+        11 => (-x, z, y),
+        12 => (-y, x, z),
+        13 => (-y, -z, x),
+        14 => (-y, -x, -z),
+        15 => (-y, z, -x),
+        16 => (z, y, -x),
+        17 => (z, x, y),
+        18 => (z, -y, x),
+        19 => (z, -x, -y),
+        20 => (-z, -y, -x),
+        21 => (-z, -x, y),
+        22 => (-z, y, x),
+        23 => (-z, x, -y),
+        _ => panic!("invalid input"),
+    }
+}
+
+fn day19_per(p: i64, v: &mut Vec<(i64, i64, i64)>) {
+    v.iter_mut().for_each(|x| *x = day19_per_coord(p, *x));
+}
+
+fn day19_count(a: &Vec<(i64, i64, i64)>, b: &Vec<(i64, i64, i64)>) -> i64 {
+    let total = a.len() + b.len();
+    let mut joined: Vec<(i64, i64, i64)> = Vec::with_capacity(total);
+    joined.extend(a);
+    joined.extend(b);
+    joined.sort();
+    joined.dedup();
+    (total - joined.len()) as i64
+}
+
+fn day19_add((x1, y1, z1): (i64, i64, i64), (x2, y2, z2): (i64, i64, i64)) -> (i64, i64, i64) {
+    (x1 + x2, y1 + y2, z1 + z2)
+}
+
+fn day19_sub((x1, y1, z1): (i64, i64, i64), (x2, y2, z2): (i64, i64, i64)) -> (i64, i64, i64) {
+    (x1 - x2, y1 - y2, z1 - z2)
+}
+
+fn day19_offset((x1, y1, z1): (i64, i64, i64), a: &mut Vec<(i64, i64, i64)>) {
+    a.iter_mut()
+        .for_each(|v| *v = (v.0 + x1, v.1 + y1, v.2 + z1));
+}
+
+fn day19_matches_offset(
+    a: &Vec<(i64, i64, i64)>,
+    b: &Vec<(i64, i64, i64)>,
+) -> Option<(i64, i64, i64)> {
+    for v1 in a {
+        for v2 in b {
+            let offset = day19_sub(*v1, *v2);
+            let mut offsetted = b.clone();
+            day19_offset(offset, &mut offsetted);
+            let matches = day19_count(a, &offsetted);
+            if matches >= 12 {
+                return Some(offset);
+            }
+        }
+    }
+    None
+}
+
+fn day19_matches_per(
+    a: &Vec<(i64, i64, i64)>,
+    b: &Vec<(i64, i64, i64)>,
+) -> Option<(i64, (i64, i64, i64))> {
+    for p in 0..24 {
+        let mut pv = b.clone();
+        day19_per(p, &mut pv);
+        if let Some(offset) = day19_matches_offset(a, &pv) {
+            return Some((p, offset));
+        }
+    }
+    None
+}
+
+fn day19_solve(
+    beacons: &mut Vec<(i64, i64, i64)>,
+    added: &mut Vec<usize>,
+    offsets: &mut Vec<(i64, i64, i64)>,
+    matching: &Vec<(usize, usize, i64, (i64, i64, i64))>,
+    data: &Vec<Vec<(i64, i64, i64)>>,
+    cur: usize,
+    trans: &Vec<(i64, (i64, i64, i64))>,
+) {
+    for &(i, j, p, offset) in matching {
+        if i == cur && !added.contains(&j) {
+            let mut trans = trans.clone();
+            trans.push((p, offset));
+            let mut permuted = data[j].clone();
+            let mut totaloff = (0, 0, 0);
+            for &(pastp, pastoff) in trans.iter().rev() {
+                day19_per(pastp, &mut permuted);
+                day19_offset(pastoff, &mut permuted);
+                totaloff = day19_add(pastoff, day19_per_coord(pastp, totaloff));
+            }
+            beacons.extend(permuted);
+            added.push(j);
+            offsets.push(totaloff);
+            day19_solve(beacons, added, offsets, matching, data, j, &trans);
+        }
+    }
+}
+
+fn day19_puzzle1() -> Result<usize, std::io::Error> {
+    let data = day19_read_data("inputs/input-19")?;
+    let mut matching: Vec<(usize, usize, i64, (i64, i64, i64))> = Vec::new();
+    for (i, a) in data.iter().enumerate() {
+        for (j, b) in data.iter().enumerate() {
+            if i == j {
+                continue;
+            }
+            if let Some((p, offset)) = day19_matches_per(a, b) {
+                matching.push((i, j, p, offset));
+                //println!("i {} j {} p {} offset {:?}", i, j, p, offset);
+            }
+        }
+    }
+    let mut beacons = Vec::new();
+    let mut added = Vec::new();
+    let mut offsets = Vec::new();
+    beacons.extend(&data[0]);
+    added.push(0);
+    day19_solve(
+        &mut beacons,
+        &mut added,
+        &mut offsets,
+        &matching,
+        &data,
+        0,
+        &Vec::new(),
+    );
+    beacons.sort();
+    beacons.dedup();
+    Ok(beacons.len() as usize)
+}
+
+fn day19_puzzle2() -> Result<usize, std::io::Error> {
+    let data = day19_read_data("inputs/input-19")?;
+    let mut matching: Vec<(usize, usize, i64, (i64, i64, i64))> = Vec::new();
+    for (i, a) in data.iter().enumerate() {
+        for (j, b) in data.iter().enumerate() {
+            if i == j {
+                continue;
+            }
+            if let Some((p, offset)) = day19_matches_per(a, b) {
+                matching.push((i, j, p, offset));
+                //println!("i {} j {} p {} offset {:?}", i, j, p, offset);
+            }
+        }
+    }
+    let mut beacons = Vec::new();
+    let mut added = Vec::new();
+    let mut offsets = Vec::new();
+    beacons.extend(&data[0]);
+    added.push(0);
+    day19_solve(
+        &mut beacons,
+        &mut added,
+        &mut offsets,
+        &matching,
+        &data,
+        0,
+        &Vec::new(),
+    );
+    let mut maxdis = 0;
+    for &a in offsets.iter() {
+        for &b in offsets.iter() {
+            let off = day19_sub(b, a);
+            let dis = off.0.abs() + off.1.abs() + off.2.abs();
+            if dis > maxdis {
+                maxdis = dis;
+            }
+        }
+    }
+    Ok(maxdis as usize)
 }
