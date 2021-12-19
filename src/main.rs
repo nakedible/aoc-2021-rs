@@ -1515,14 +1515,20 @@ fn day19_per(p: i64, v: &mut Vec<(i64, i64, i64)>) {
     v.iter_mut().for_each(|x| *x = day19_per_coord(p, *x));
 }
 
-fn day19_count(a: &Vec<(i64, i64, i64)>, b: &Vec<(i64, i64, i64)>) -> i64 {
-    let total = a.len() + b.len();
-    let mut joined: Vec<(i64, i64, i64)> = Vec::with_capacity(total);
-    joined.extend(a);
-    joined.extend(b);
-    joined.sort();
-    joined.dedup();
-    (total - joined.len()) as i64
+fn day19_count(a: &Vec<(i64, i64, i64)>, b: &Vec<(i64, i64, i64)>) -> bool {
+    let mut count = 0;
+    for (i, bv) in b.iter().enumerate() {
+        if a.contains(bv) {
+            count += 1;
+            if count >= 12 {
+                return true;
+            }
+        }
+        if b.len() - i + 1 + count < 12 {
+            return false;
+        }
+    }
+    false
 }
 
 fn day19_add((x1, y1, z1): (i64, i64, i64), (x2, y2, z2): (i64, i64, i64)) -> (i64, i64, i64) {
@@ -1547,8 +1553,7 @@ fn day19_matches_offset(
             let offset = day19_sub(*v1, *v2);
             let mut offsetted = b.clone();
             day19_offset(offset, &mut offsetted);
-            let matches = day19_count(a, &offsetted);
-            if matches >= 12 {
+            if day19_count(a, &offsetted) {
                 return Some(offset);
             }
         }
