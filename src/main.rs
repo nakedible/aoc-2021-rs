@@ -47,7 +47,7 @@ fn main() -> Result<(), std::io::Error> {
 }
 
 #[inline(never)]
-fn day1_puzzle1() -> Result<usize, std::io::Error> {
+pub fn day1_puzzle1() -> Result<usize, std::io::Error> {
     Ok(std::fs::read_to_string("inputs/input-01")?
         .lines()
         .map(|x| x.parse::<i64>().unwrap())
@@ -58,7 +58,7 @@ fn day1_puzzle1() -> Result<usize, std::io::Error> {
 }
 
 #[inline(never)]
-fn day1_puzzle2() -> Result<usize, std::io::Error> {
+pub fn day1_puzzle2() -> Result<usize, std::io::Error> {
     Ok(std::fs::read_to_string("inputs/input-01")?
         .lines()
         .map(|x| x.parse::<i64>().unwrap())
@@ -72,7 +72,7 @@ fn day1_puzzle2() -> Result<usize, std::io::Error> {
 }
 
 #[inline(never)]
-fn day2_puzzle1() -> Result<usize, std::io::Error> {
+pub fn day2_puzzle1() -> Result<usize, std::io::Error> {
     let (posh, depth) = std::fs::read_to_string("inputs/input-02")?
         .lines()
         .map(|x| {
@@ -92,7 +92,7 @@ fn day2_puzzle1() -> Result<usize, std::io::Error> {
 }
 
 #[inline(never)]
-fn day2_puzzle2() -> Result<usize, std::io::Error> {
+pub fn day2_puzzle2() -> Result<usize, std::io::Error> {
     let (posh, depth, _aim) = std::fs::read_to_string("inputs/input-02")?
         .lines()
         .map(|x| {
@@ -112,7 +112,7 @@ fn day2_puzzle2() -> Result<usize, std::io::Error> {
 }
 
 #[inline(never)]
-fn day3_puzzle1() -> Result<usize, std::io::Error> {
+pub fn day3_puzzle1() -> Result<usize, std::io::Error> {
     let data = std::fs::read_to_string("inputs/input-03")?
         .lines()
         .map(|l| {
@@ -156,7 +156,7 @@ fn day3_filter(data: &Vec<Vec<i64>>, most: bool) -> Vec<i64> {
 }
 
 #[inline(never)]
-fn day3_puzzle2() -> Result<usize, std::io::Error> {
+pub fn day3_puzzle2() -> Result<usize, std::io::Error> {
     let data = std::fs::read_to_string("inputs/input-03")?
         .lines()
         .map(|l| {
@@ -223,7 +223,7 @@ fn day4_calcscore(board: &[[i64; 5]; 5], pick: i64) -> i64 {
 }
 
 #[inline(never)]
-fn day4_puzzle1() -> Result<usize, std::io::Error> {
+pub fn day4_puzzle1() -> Result<usize, std::io::Error> {
     let (picks, mut boards) = day4_readboards();
 
     for pick in picks {
@@ -239,7 +239,8 @@ fn day4_puzzle1() -> Result<usize, std::io::Error> {
     Ok(0 as usize)
 }
 
-fn day4_puzzle2() -> Result<usize, std::io::Error> {
+#[inline(never)]
+pub fn day4_puzzle2() -> Result<usize, std::io::Error> {
     let (picks, mut boards) = day4_readboards();
 
     let mut last_score = -1;
@@ -263,7 +264,8 @@ fn day4_puzzle2() -> Result<usize, std::io::Error> {
     Ok(last_score as usize)
 }
 
-fn day5_puzzle12(diag: bool) -> Result<usize, std::io::Error> {
+#[inline(never)]
+pub fn day5_puzzle12(diag: bool) -> Result<usize, std::io::Error> {
     let data = std::fs::read_to_string("inputs/input-05")?
         .lines()
         .map(|l| {
@@ -310,7 +312,8 @@ fn day5_puzzle12(diag: bool) -> Result<usize, std::io::Error> {
     Ok(result as usize)
 }
 
-fn day6_puzzle1() -> Result<usize, std::io::Error> {
+#[inline(never)]
+pub fn day6_puzzle1() -> Result<usize, std::io::Error> {
     let mut fish = std::fs::read_to_string("inputs/input-06")?
         .lines()
         .next()
@@ -334,7 +337,8 @@ fn day6_puzzle1() -> Result<usize, std::io::Error> {
     Ok(fish.len() as usize)
 }
 
-fn day6_puzzle2() -> Result<usize, std::io::Error> {
+#[inline(never)]
+pub fn day6_puzzle2() -> Result<usize, std::io::Error> {
     let fish = std::fs::read_to_string("inputs/input-06")?
         .lines()
         .next()
@@ -356,7 +360,8 @@ fn day6_puzzle2() -> Result<usize, std::io::Error> {
     Ok(total as usize)
 }
 
-fn day7_puzzle1() -> Result<usize, std::io::Error> {
+#[inline(never)]
+pub fn day7_puzzle1() -> Result<usize, std::io::Error> {
     let crabs = std::fs::read_to_string("inputs/input-07")?
         .lines()
         .next()
@@ -371,7 +376,8 @@ fn day7_puzzle1() -> Result<usize, std::io::Error> {
     Ok(minfuel as usize)
 }
 
-fn day7_puzzle2() -> Result<usize, std::io::Error> {
+#[inline(never)]
+pub fn day7_puzzle2() -> Result<usize, std::io::Error> {
     let crabs = std::fs::read_to_string("inputs/input-07")?
         .lines()
         .next()
@@ -394,7 +400,8 @@ fn day7_puzzle2() -> Result<usize, std::io::Error> {
     Ok(minfuel as usize)
 }
 
-fn day8_puzzle1() -> Result<usize, std::io::Error> {
+#[inline(never)]
+pub fn day8_puzzle1() -> Result<usize, std::io::Error> {
     let data = std::fs::read_to_string("inputs/input-08")?
         .lines()
         .map(|l| {
@@ -479,7 +486,8 @@ fn day8_decode_digit(digits: &Vec<u8>, val: u8) -> i64 {
     digits.iter().position(|&x| x == val).unwrap() as i64
 }
 
-fn day8_puzzle2() -> Result<usize, std::io::Error> {
+#[inline(never)]
+pub fn day8_puzzle2() -> Result<usize, std::io::Error> {
     let data = std::fs::read_to_string("inputs/input-08")?
         .lines()
         .map(|l| {
@@ -503,10 +511,6 @@ fn day8_puzzle2() -> Result<usize, std::io::Error> {
     Ok(sum as usize)
 }
 
-// fn day9_get_neighbours(&heightmap: [[i8; 100]; 100], row: usize, col: usize) -> [i8; 4] {
-
-// }
-
 fn day9_safeget(heightmap: &[[i8; 100]; 100], row: i64, col: i64) -> i8 {
     if row < 0 || row > 99 || col < 0 || col > 99 {
         127
@@ -515,7 +519,8 @@ fn day9_safeget(heightmap: &[[i8; 100]; 100], row: i64, col: i64) -> i8 {
     }
 }
 
-fn day9_puzzle1() -> Result<usize, std::io::Error> {
+#[inline(never)]
+pub fn day9_puzzle1() -> Result<usize, std::io::Error> {
     let mut heightmap = [[0i8; 100]; 100];
     std::fs::read_to_string("inputs/input-09")?
         .lines()
@@ -554,7 +559,8 @@ fn day9_basin_size(heightmap: &mut [[i8; 100]; 100], row: i64, col: i64) -> i64 
     }
 }
 
-fn day9_puzzle2() -> Result<usize, std::io::Error> {
+#[inline(never)]
+pub fn day9_puzzle2() -> Result<usize, std::io::Error> {
     let mut heightmap = [[0i8; 100]; 100];
     std::fs::read_to_string("inputs/input-09")?
         .lines()
@@ -607,7 +613,8 @@ fn day10_value(ch: char) -> i64 {
     }
 }
 
-fn day10_puzzle1() -> Result<usize, std::io::Error> {
+#[inline(never)]
+pub fn day10_puzzle1() -> Result<usize, std::io::Error> {
     let lines = std::fs::read_to_string("inputs/input-10")?
         .lines()
         .map(str::to_owned)
@@ -644,7 +651,8 @@ fn day10_score(ch: char) -> i64 {
     }
 }
 
-fn day10_puzzle2() -> Result<usize, std::io::Error> {
+#[inline(never)]
+pub fn day10_puzzle2() -> Result<usize, std::io::Error> {
     let lines = std::fs::read_to_string("inputs/input-10")?
         .lines()
         .map(str::to_owned)
@@ -679,7 +687,8 @@ fn day10_puzzle2() -> Result<usize, std::io::Error> {
     Ok(middle as usize)
 }
 
-fn day11_puzzle1() -> Result<usize, std::io::Error> {
+#[inline(never)]
+pub fn day11_puzzle1() -> Result<usize, std::io::Error> {
     let mut heightmap = [[0i8; 10]; 10];
     std::fs::read_to_string("inputs/input-11")?
         .lines()
@@ -720,7 +729,8 @@ fn day11_puzzle1() -> Result<usize, std::io::Error> {
     Ok(flashes as usize)
 }
 
-fn day11_puzzle2() -> Result<usize, std::io::Error> {
+#[inline(never)]
+pub fn day11_puzzle2() -> Result<usize, std::io::Error> {
     let mut heightmap = [[0i8; 10]; 10];
     std::fs::read_to_string("inputs/input-11")?
         .lines()
@@ -781,7 +791,8 @@ fn day12_countpaths<'a>(graph: &UnGraphMap<&'a str, ()>, visited: &mut Vec<&'a s
     ret
 }
 
-fn day12_puzzle1() -> Result<usize, std::io::Error> {
+#[inline(never)]
+pub fn day12_puzzle1() -> Result<usize, std::io::Error> {
     let mut graph = UnGraphMap::new();
     let file = std::fs::read_to_string("inputs/input-12")?;
     file.lines().for_each(|line| {
@@ -822,7 +833,8 @@ fn day12_countpaths2<'a>(
     ret
 }
 
-fn day12_puzzle2() -> Result<usize, std::io::Error> {
+#[inline(never)]
+pub fn day12_puzzle2() -> Result<usize, std::io::Error> {
     let mut graph = UnGraphMap::new();
     let file = std::fs::read_to_string("inputs/input-12")?;
     file.lines().for_each(|line| {
@@ -853,7 +865,8 @@ fn day13_fold(points: &mut Vec<(i64, i64)>, x: bool, val: i64) {
     }
 }
 
-fn day13_puzzle1() -> Result<usize, std::io::Error> {
+#[inline(never)]
+pub fn day13_puzzle1() -> Result<usize, std::io::Error> {
     let file = std::fs::read_to_string("inputs/input-13")?;
     let (points, splits) = file.split_once("\n\n").unwrap();
     let mut points = points
@@ -880,7 +893,8 @@ fn day13_puzzle1() -> Result<usize, std::io::Error> {
     Ok(points.len() as usize)
 }
 
-fn day13_puzzle2() -> Result<usize, std::io::Error> {
+#[inline(never)]
+pub fn day13_puzzle2() -> Result<usize, std::io::Error> {
     let file = std::fs::read_to_string("inputs/input-13")?;
     let (points, splits) = file.split_once("\n\n").unwrap();
     let mut points = points
@@ -918,7 +932,8 @@ fn day13_puzzle2() -> Result<usize, std::io::Error> {
     Ok(0 as usize)
 }
 
-fn day14_puzzle1() -> Result<usize, std::io::Error> {
+#[inline(never)]
+pub fn day14_puzzle1() -> Result<usize, std::io::Error> {
     let file = std::fs::read_to_string("inputs/input-14")?;
     let (start, rules) = file.split_once("\n\n").unwrap();
     let rules = rules
@@ -946,7 +961,8 @@ fn day14_puzzle1() -> Result<usize, std::io::Error> {
     Ok(response as usize)
 }
 
-fn day14_puzzle2() -> Result<usize, std::io::Error> {
+#[inline(never)]
+pub fn day14_puzzle2() -> Result<usize, std::io::Error> {
     let file = std::fs::read_to_string("inputs/input-14")?;
     let (start, rules) = file.split_once("\n\n").unwrap();
     let rules = rules
@@ -1002,7 +1018,8 @@ fn day15_neighbours<const L: usize>(
     ret
 }
 
-fn day15_puzzle1() -> Result<usize, std::io::Error> {
+#[inline(never)]
+pub fn day15_puzzle1() -> Result<usize, std::io::Error> {
     let mut dangermap = [[0i8; 100]; 100];
     std::fs::read_to_string("inputs/input-15")?
         .lines()
@@ -1041,7 +1058,8 @@ fn day15_dupmap(
     }
 }
 
-fn day15_puzzle2() -> Result<usize, std::io::Error> {
+#[inline(never)]
+pub fn day15_puzzle2() -> Result<usize, std::io::Error> {
     let mut dangermap = [[0i8; 500]; 500];
     std::fs::read_to_string("inputs/input-15")?
         .lines()
@@ -1078,7 +1096,8 @@ fn day16_readnum(it: &mut impl Iterator<Item = char>, n: usize) -> Option<i64> {
     }
 }
 
-fn day16_puzzle1() -> Result<usize, std::io::Error> {
+#[inline(never)]
+pub fn day16_puzzle1() -> Result<usize, std::io::Error> {
     let bits = std::fs::read_to_string("inputs/input-16")?
         .chars()
         .map(|c| format!("{:04b}", c.to_digit(16).unwrap()))
@@ -1200,7 +1219,8 @@ fn day16_compute(it: &mut impl Iterator<Item = char>) -> Option<i64> {
     Some(ret)
 }
 
-fn day16_puzzle2() -> Result<usize, std::io::Error> {
+#[inline(never)]
+pub fn day16_puzzle2() -> Result<usize, std::io::Error> {
     let bits = std::fs::read_to_string("inputs/input-16")?
         .chars()
         .map(|c| format!("{:04b}", c.to_digit(16).unwrap()))
@@ -1254,7 +1274,8 @@ fn day17_hits(xvel: i64, yvel: i64, xmin: i64, ymin: i64, xmax: i64, ymax: i64) 
     panic!("should not get here")
 }
 
-fn day17_puzzle1() -> Result<usize, std::io::Error> {
+#[inline(never)]
+pub fn day17_puzzle1() -> Result<usize, std::io::Error> {
     let data = std::fs::read_to_string("inputs/input-17")?;
     let (xs, ys) = data.split_once(", ").unwrap();
     let (_, xs) = xs.split_once("=").unwrap();
@@ -1278,7 +1299,8 @@ fn day17_puzzle1() -> Result<usize, std::io::Error> {
     Ok(max as usize)
 }
 
-fn day17_puzzle2() -> Result<usize, std::io::Error> {
+#[inline(never)]
+pub fn day17_puzzle2() -> Result<usize, std::io::Error> {
     let data = std::fs::read_to_string("inputs/input-17")?;
     let (xs, ys) = data.split_once(", ").unwrap();
     let (_, xs) = xs.split_once("=").unwrap();
@@ -1433,7 +1455,8 @@ fn day18_add(a: Box<Sn>, b: Box<Sn>) -> Box<Sn> {
     day18_reduce(Box::new(Sn::Pair(a, b)))
 }
 
-fn day18_puzzle1() -> Result<usize, std::io::Error> {
+#[inline(never)]
+pub fn day18_puzzle1() -> Result<usize, std::io::Error> {
     let data = std::fs::read_to_string("inputs/input-18")?
         .lines()
         .map(|l| day18_parse(l).0)
@@ -1443,7 +1466,8 @@ fn day18_puzzle1() -> Result<usize, std::io::Error> {
     Ok(ret as usize)
 }
 
-fn day18_puzzle2() -> Result<usize, std::io::Error> {
+#[inline(never)]
+pub fn day18_puzzle2() -> Result<usize, std::io::Error> {
     let data = std::fs::read_to_string("inputs/input-18")?
         .lines()
         .map(|l| day18_parse(l).0)
@@ -1603,7 +1627,8 @@ fn day19_solve(
     }
 }
 
-fn day19_puzzle1() -> Result<usize, std::io::Error> {
+#[inline(never)]
+pub fn day19_puzzle1() -> Result<usize, std::io::Error> {
     let data = day19_read_data("inputs/input-19")?;
     let mut matching: Vec<(usize, usize, i64, (i64, i64, i64))> = Vec::new();
     for (i, a) in data.iter().enumerate() {
@@ -1636,7 +1661,8 @@ fn day19_puzzle1() -> Result<usize, std::io::Error> {
     Ok(beacons.len() as usize)
 }
 
-fn day19_puzzle2() -> Result<usize, std::io::Error> {
+#[inline(never)]
+pub fn day19_puzzle2() -> Result<usize, std::io::Error> {
     let data = day19_read_data("inputs/input-19")?;
     let mut matching: Vec<(usize, usize, i64, (i64, i64, i64))> = Vec::new();
     for (i, a) in data.iter().enumerate() {
