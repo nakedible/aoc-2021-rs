@@ -1,3 +1,4 @@
+use cached::proc_macro::cached;
 use pathfinding::directed::astar::astar;
 use petgraph::graphmap::UnGraphMap;
 use std::cmp::{max, min};
@@ -1629,6 +1630,7 @@ fn day19_solve(
     }
 }
 
+#[cached(key="bool", convert="{ false }")] // hack to avoid calculating matching set twice
 fn day19_build_matching(
     data: &Vec<Vec<(i64, i64, i64)>>,
 ) -> Vec<(usize, usize, i64, (i64, i64, i64))> {
