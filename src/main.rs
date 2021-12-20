@@ -1574,8 +1574,8 @@ fn day19_matches_offset(
     a: &Vec<(i64, i64, i64)>,
     b: &Vec<(i64, i64, i64)>,
 ) -> Option<(i64, i64, i64)> {
-    for v1 in a {
-        for v2 in b {
+    for v1 in a[..14].iter() {
+        for v2 in b[..14].iter() {
             let offset = day19_sub(*v1, *v2);
             let mut offsetted = b.clone();
             day19_offset(offset, &mut offsetted);
