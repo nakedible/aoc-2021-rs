@@ -387,7 +387,7 @@ pub fn day7_puzzle2() -> Result<usize, std::io::Error> {
         .split(",")
         .map(|x| x.parse::<i64>().unwrap())
         .collect::<Vec<i64>>();
-    let minfuel = (470..=475) // 0..2000
+    let minfuel = (0..=2000)
         .map(|i| {
             crabs
                 .iter()
