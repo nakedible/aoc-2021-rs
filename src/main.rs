@@ -43,6 +43,8 @@ fn main() -> Result<(), std::io::Error> {
     println!("day 18 puzzle 2: {}", day18_puzzle2()?);
     println!("day 19 puzzle 1: {}", day19_puzzle1()?);
     println!("day 19 puzzle 2: {}", day19_puzzle2()?);
+    println!("day 20 puzzle 1: {}", day20_puzzle1()?);
+    println!("day 20 puzzle 2: {}", day20_puzzle2()?);
     Ok(())
 }
 
@@ -1701,4 +1703,92 @@ pub fn day19_puzzle2() -> Result<usize, std::io::Error> {
         }
     }
     Ok(maxdis as usize)
+}
+
+fn day20_ch_to_bool(ch: char) -> bool {
+    match ch {
+        '#' => true,
+        '.' => false,
+        _ => panic!("invalid input"),
+    }
+}
+
+fn day20_getint<const L: usize>(image: &[[bool; L]; L], x: usize, y: usize) -> usize {
+    let mut val = 0usize;
+    for row in y - 1..=y + 1 {
+        for col in x - 1..=x + 1 {
+            val = val << 1 | image[row][col] as usize;
+        }
+    }
+    val
+}
+
+fn day20_enhance<const L: usize>(
+    image: &mut [[bool; L]; L],
+    future: &mut [[bool; L]; L],
+    algo: &Vec<bool>,
+) {
+    let xlen = image[0].len();
+    let ylen = image.len();
+    for x in 0..xlen {
+        future[0][x] = !image[0][x];
+        future[ylen - 1][x] = !image[ylen - 1][x];
+    }
+    for y in 1..ylen - 1 {
+        future[y][0] = !image[y][0];
+        for x in 1..xlen - 1 {
+            future[y][x] = algo[day20_getint(image, x, y)];
+        }
+        future[y][xlen - 1] = !image[y][xlen - 1];
+    }
+}
+
+#[inline(never)]
+pub fn day20_puzzle1() -> Result<usize, std::io::Error> {
+    const N: usize = 2;
+    const SIZ: usize = 100 + 2 + (N * 2);
+    let data = std::fs::read_to_string("inputs/input-20")?;
+    let (algostr, imagestr) = data.split_once("\n\n").unwrap();
+    let algo: Vec<bool> = algostr.chars().map(day20_ch_to_bool).collect();
+    let mut image = [[false; SIZ]; SIZ];
+    let mut future = [[false; SIZ]; SIZ];
+    imagestr.lines().enumerate().for_each(|(row, line)| {
+        line.chars().enumerate().for_each(|(col, c)| {
+            image[row + ((SIZ - 100) / 2)][col + ((SIZ - 100) / 2)] = day20_ch_to_bool(c);
+        })
+    });
+    for _ in 0..N {
+        day20_enhance(&mut image, &mut future, &algo);
+        std::mem::swap(&mut image, &mut future);
+    }
+    let ret: i64 = image
+        .iter()
+        .map(|r| r.iter().map(|&c| c as i64).sum::<i64>())
+        .sum::<i64>();
+    Ok(ret as usize)
+}
+
+#[inline(never)]
+pub fn day20_puzzle2() -> Result<usize, std::io::Error> {
+    const N: usize = 50;
+    const SIZ: usize = 100 + 2 + (N * 2);
+    let data = std::fs::read_to_string("inputs/input-20")?;
+    let (algostr, imagestr) = data.split_once("\n\n").unwrap();
+    let algo: Vec<bool> = algostr.chars().map(day20_ch_to_bool).collect();
+    let mut image = [[false; SIZ]; SIZ];
+    let mut future = [[false; SIZ]; SIZ];
+    imagestr.lines().enumerate().for_each(|(row, line)| {
+        line.chars().enumerate().for_each(|(col, c)| {
+            image[row + ((SIZ - 100) / 2)][col + ((SIZ - 100) / 2)] = day20_ch_to_bool(c);
+        })
+    });
+    for _ in 0..N {
+        day20_enhance(&mut image, &mut future, &algo);
+        std::mem::swap(&mut image, &mut future);
+    }
+    let ret: i64 = image
+        .iter()
+        .map(|r| r.iter().map(|&c| c as i64).sum::<i64>())
+        .sum::<i64>();
+    Ok(ret as usize)
 }
