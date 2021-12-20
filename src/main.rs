@@ -1629,10 +1629,10 @@ fn day19_solve(
     }
 }
 
-#[inline(never)]
-pub fn day19_puzzle1() -> Result<usize, std::io::Error> {
-    let data = day19_read_data("inputs/input-19")?;
-    let mut matching: Vec<(usize, usize, i64, (i64, i64, i64))> = Vec::new();
+fn day19_build_matching(
+    data: &Vec<Vec<(i64, i64, i64)>>,
+) -> Vec<(usize, usize, i64, (i64, i64, i64))> {
+    let mut matching = Vec::new();
     for (i, a) in data.iter().enumerate() {
         for (j, b) in data.iter().enumerate() {
             if i == j {
@@ -1644,6 +1644,13 @@ pub fn day19_puzzle1() -> Result<usize, std::io::Error> {
             }
         }
     }
+    matching
+}
+
+#[inline(never)]
+pub fn day19_puzzle1() -> Result<usize, std::io::Error> {
+    let data = day19_read_data("inputs/input-19")?;
+    let matching = day19_build_matching(&data);
     let mut beacons = Vec::new();
     let mut added = Vec::new();
     let mut offsets = Vec::new();
@@ -1666,18 +1673,7 @@ pub fn day19_puzzle1() -> Result<usize, std::io::Error> {
 #[inline(never)]
 pub fn day19_puzzle2() -> Result<usize, std::io::Error> {
     let data = day19_read_data("inputs/input-19")?;
-    let mut matching: Vec<(usize, usize, i64, (i64, i64, i64))> = Vec::new();
-    for (i, a) in data.iter().enumerate() {
-        for (j, b) in data.iter().enumerate() {
-            if i == j {
-                continue;
-            }
-            if let Some((p, offset)) = day19_matches_per(a, b) {
-                matching.push((i, j, p, offset));
-                //println!("i {} j {} p {} offset {:?}", i, j, p, offset);
-            }
-        }
-    }
+    let matching = day19_build_matching(&data);
     let mut beacons = Vec::new();
     let mut added = Vec::new();
     let mut offsets = Vec::new();
