@@ -2,6 +2,7 @@ use cached::proc_macro::cached;
 use pathfinding::directed::astar::astar;
 use petgraph::graphmap::UnGraphMap;
 use std::cmp::{max, min};
+use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::collections::VecDeque;
 
@@ -46,6 +47,8 @@ fn main() -> Result<(), std::io::Error> {
     println!("day 19 puzzle 2: {}", day19_puzzle2()?);
     println!("day 20 puzzle 1: {}", day20_puzzle1()?);
     println!("day 20 puzzle 2: {}", day20_puzzle2()?);
+    println!("day 21 puzzle 1: {}", day21_puzzle1()?);
+    println!("day 21 puzzle 2: {}", day21_puzzle2()?);
     Ok(())
 }
 
@@ -1788,5 +1791,74 @@ pub fn day20_puzzle2() -> Result<usize, std::io::Error> {
         .iter()
         .map(|r| r.iter().map(|&c| c as i64).sum::<i64>())
         .sum::<i64>();
+    Ok(ret as usize)
+}
+
+fn day21_read_data(filename: &str) -> Result<(u8, u8), std::io::Error> {
+    let data = std::fs::read_to_string(filename)?;
+    let mut lines = data.lines();
+    let apos = lines.next().unwrap()[28..].parse::<u8>().unwrap();
+    let bpos = lines.next().unwrap()[28..].parse::<u8>().unwrap();
+    Ok((apos, bpos))
+}
+
+#[inline(never)]
+pub fn day21_puzzle1() -> Result<usize, std::io::Error> {
+    let (p1pos, p2pos) = day21_read_data("inputs/input-21")?;
+    let mut die = 1;
+    let mut rolls: i64 = 0;
+    let mut state: (i64, i64, i64, i64) = (p1pos.into(), 0, p2pos.into(), 0);
+    loop {
+        rolls += 3;
+        let (apos, ascore, bpos, bscore) = state;
+        let mut roll = 0;
+        for _ in 0..3 {
+            roll += die;
+            die = if die >= 100 { 1 } else { die + 1 };
+        }
+        let cpos = (apos + roll) % 10;
+        let cscore = ascore + cpos;
+        state = (bpos, bscore, cpos, cscore);
+        if cscore >= 1000 {
+            break;
+        }
+    }
+    let (_, lscore, _, _) = state;
+    let ret = lscore * rolls;
+    Ok(ret as usize)
+}
+
+#[inline(never)]
+pub fn day21_puzzle2() -> Result<usize, std::io::Error> {
+    let (apos, bpos) = day21_read_data("inputs/input-21")?;
+    let mut universes: BTreeMap<(u8, u8, u8, u8, bool), i64> = BTreeMap::new();
+    universes.insert((apos, 0, bpos, 0, true), 1);
+    let mut p1wins: i64 = 0;
+    let mut p2wins: i64 = 0;
+    let rolls = [(3, 1), (4, 3), (5, 6), (6, 7), (7, 6), (8, 3), (9, 1)];
+    while !universes.is_empty() {
+        let (&key, &count) = universes.iter().next().unwrap();
+        let (apos, ascore, bpos, bscore, p1up) = key;
+        universes.remove(&key);
+        for (v, m) in rolls {
+            let cpos = if (apos + v) > 10 {
+                apos + v - 10
+            } else {
+                apos + v
+            };
+            let cscore = ascore + cpos;
+            if cscore >= 21 {
+                if p1up {
+                    p1wins += count * m;
+                } else {
+                    p2wins += count * m;
+                }
+            } else {
+                let key = (bpos, bscore, cpos, cscore, !p1up);
+                *universes.entry(key).or_insert(0) += count * m;
+            }
+        }
+    }
+    let ret = max(p1wins, p2wins);
     Ok(ret as usize)
 }
