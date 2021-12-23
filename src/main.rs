@@ -49,6 +49,8 @@ fn main() -> Result<(), std::io::Error> {
     println!("day 20 puzzle 2: {}", day20_puzzle2()?);
     println!("day 21 puzzle 1: {}", day21_puzzle1()?);
     println!("day 21 puzzle 2: {}", day21_puzzle2()?);
+    println!("day 22 puzzle 1: {}", day22_puzzle1()?);
+    println!("day 22 puzzle 2: {}", day22_puzzle2()?);
     Ok(())
 }
 
@@ -1861,4 +1863,110 @@ pub fn day21_puzzle2() -> Result<usize, std::io::Error> {
     }
     let ret = max(p1wins, p2wins);
     Ok(ret as usize)
+}
+
+type Day22Point = (i64, i64, i64);
+type Day22Step = (bool, Day22Point, Day22Point);
+
+fn day22_read_data(filename: &str) -> Result<Vec<Day22Step>, std::io::Error> {
+    let data = std::fs::read_to_string(filename)?
+        .lines()
+        .map(|l| {
+            let (onoff, rest) = l.split_once(" ").unwrap();
+            let (xrange, rest) = rest.split_once(",").unwrap();
+            let (yrange, zrange) = rest.split_once(",").unwrap();
+            let (xmin, xmax) = xrange.split_once("=").unwrap().1.split_once("..").unwrap();
+            let (ymin, ymax) = yrange.split_once("=").unwrap().1.split_once("..").unwrap();
+            let (zmin, zmax) = zrange.split_once("=").unwrap().1.split_once("..").unwrap();
+            (
+                onoff == "on",
+                (
+                    xmin.parse::<i64>().unwrap(),
+                    ymin.parse::<i64>().unwrap(),
+                    zmin.parse::<i64>().unwrap(),
+                ),
+                (
+                    xmax.parse::<i64>().unwrap(),
+                    ymax.parse::<i64>().unwrap(),
+                    zmax.parse::<i64>().unwrap(),
+                ),
+            )
+        })
+        .collect();
+    Ok(data)
+}
+
+#[inline(never)]
+pub fn day22_puzzle1() -> Result<usize, std::io::Error> {
+    let data = day22_read_data("inputs/input-22")?;
+    let mut core = [[[false; 101]; 101]; 101];
+    for &(onoff, (xmin, ymin, zmin), (xmax, ymax, zmax)) in data.iter() {
+        for z in max(zmin, -50)..=min(zmax, 50) {
+            for y in max(ymin, -50)..=min(ymax, 50) {
+                for x in max(xmin, -50)..=min(xmax, 50) {
+                    core[(z + 50) as usize][(y + 50) as usize][(x + 50) as usize] = onoff;
+                }
+            }
+        }
+    }
+    let count = core
+        .iter()
+        .map(|z| {
+            z.iter()
+                .map(|y| y.iter().map(|&x| x as i64).sum::<i64>())
+                .sum::<i64>()
+        })
+        .sum::<i64>();
+    Ok(count as usize)
+}
+
+fn day22_split(a: Day22Step, b: Day22Step) -> Vec<Day22Step> {
+    let (t, (axmin, aymin, azmin), (axmax, aymax, azmax)) = a;
+    let (_, (bxmin, bymin, bzmin), (bxmax, bymax, bzmax)) = b;
+
+    if !((bxmax >= axmin)
+        && (bymax >= aymin)
+        && (bzmax >= azmin)
+        && (bxmin <= axmax)
+        && (bymin <= aymax)
+        && (bzmin <= azmax))
+    {
+        return vec![a];
+    }
+
+    let mut c = Vec::new();
+    let (ozmin, ozmax) = (bzmax + 1, bzmin - 1);
+    let (izmin, izmax) = (max(bzmin, azmin), min(bzmax, azmax));
+    let (oymin, oymax) = (bymax + 1, bymin - 1);
+    let (iymin, iymax) = (max(bymin, aymin), min(bymax, aymax));
+    let (oxmin, oxmax) = (bxmax + 1, bxmin - 1);
+    (azmin < bzmin).then(|| c.push((t, (axmin, aymin, azmin), (axmax, aymax, ozmax))));
+    (azmax > bzmax).then(|| c.push((t, (axmin, aymin, ozmin), (axmax, aymax, azmax))));
+    (aymin < bymin).then(|| c.push((t, (axmin, aymin, izmin), (axmax, oymax, izmax))));
+    (aymax > bymax).then(|| c.push((t, (axmin, oymin, izmin), (axmax, aymax, izmax))));
+    (axmin < bxmin).then(|| c.push((t, (axmin, iymin, izmin), (oxmax, iymax, izmax))));
+    (axmax > bxmax).then(|| c.push((t, (oxmin, iymin, izmin), (axmax, iymax, izmax))));
+    c
+}
+
+fn day22_count(a: Day22Step) -> i64 {
+    let (t, (xmin, ymin, zmin), (xmax, ymax, zmax)) = a;
+    (t as i64) * (1 + xmax - xmin) * (1 + ymax - ymin) * (1 + zmax - zmin)
+}
+
+#[inline(never)]
+pub fn day22_puzzle2() -> Result<usize, std::io::Error> {
+    let data = day22_read_data("inputs/input-22")?;
+    let mut cubes: Vec<Day22Step> = Vec::new();
+    for &d in &data {
+        cubes = cubes.iter().flat_map(|&a| day22_split(a, d)).collect();
+        if d.0 {
+            cubes.push(d);
+        }
+    }
+    let mut count = 0;
+    for &c in &cubes {
+        count += day22_count(c);
+    }
+    Ok(count as usize)
 }
