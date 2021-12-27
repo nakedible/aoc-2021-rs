@@ -2407,7 +2407,6 @@ pub fn day24_puzzle1() -> Result<usize, std::io::Error> {
         |p| day24_goal(p),
     )
     .unwrap();
-    //let ret = paths.map(|p| p.last().unwrap().input).max().unwrap();
     let ret = path.last().unwrap().input;
     Ok(ret as usize)
 }
