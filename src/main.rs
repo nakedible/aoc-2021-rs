@@ -56,6 +56,7 @@ fn main() -> Result<(), std::io::Error> {
     println!("day 23 puzzle 2: {}", day23_puzzle2()?);
     println!("day 24 puzzle 1: {}", day24_puzzle1()?);
     println!("day 24 puzzle 2: {}", day24_puzzle2()?);
+    println!("day 25 puzzle 1: {}", day25_puzzle1()?);
     Ok(())
 }
 
@@ -2428,4 +2429,69 @@ pub fn day24_puzzle2() -> Result<usize, std::io::Error> {
     .unwrap();
     let ret = path.last().unwrap().input;
     Ok(ret as usize)
+}
+
+#[derive(Copy, Clone, Eq, PartialEq)]
+enum Day25Cucu {
+    Empty,
+    East,
+    South,
+}
+
+fn day25_ch_to_cucu(ch: char) -> Day25Cucu {
+    match ch {
+        '.' => Day25Cucu::Empty,
+        '>' => Day25Cucu::East,
+        'v' => Day25Cucu::South,
+        _ => panic!("invalid input"),
+    }
+}
+
+#[inline(never)]
+pub fn day25_puzzle1() -> Result<usize, std::io::Error> {
+    const ROWS: usize = 137;
+    const COLS: usize = 139;
+    let mut cur = [[Day25Cucu::Empty; COLS]; ROWS];
+    std::fs::read_to_string("inputs/input-25")?
+        .lines()
+        .enumerate()
+        .for_each(|(row, line)| {
+            line.chars()
+                .enumerate()
+                .for_each(|(col, ch)| cur[row][col] = day25_ch_to_cucu(ch))
+        });
+    let mut fut = cur.clone();
+    let mut steps = 0;
+    loop {
+        steps += 1;
+        let mut changes = false;
+        for row in 0..ROWS {
+            for col in 0..COLS {
+                if cur[row][col] == Day25Cucu::East
+                    && cur[row][(col + 1).rem_euclid(COLS)] == Day25Cucu::Empty
+                {
+                    fut[row][col] = Day25Cucu::Empty;
+                    fut[row][(col + 1).rem_euclid(COLS)] = Day25Cucu::East;
+                    changes = true;
+                }
+            }
+        }
+        cur = fut;
+        for row in 0..ROWS {
+            for col in 0..COLS {
+                if cur[row][col] == Day25Cucu::South
+                    && cur[(row + 1).rem_euclid(ROWS)][col] == Day25Cucu::Empty
+                {
+                    fut[row][col] = Day25Cucu::Empty;
+                    fut[(row + 1).rem_euclid(ROWS)][col] = Day25Cucu::South;
+                    changes = true;
+                }
+            }
+        }
+        cur = fut;
+        if !changes {
+            break;
+        }
+    }
+    Ok(steps as usize)
 }
