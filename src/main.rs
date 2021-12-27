@@ -2328,11 +2328,7 @@ fn day24_setreg(state: &Day24State, r: Day24RegVal, v: i64) -> Day24State {
     }
 }
 
-fn day24_eval(
-    state: &Day24State,
-    inst: Day24Inst,
-    input: i64,
-) -> Day24State {
+fn day24_eval(state: &Day24State, inst: Day24Inst, input: i64) -> Day24State {
     match inst {
         Day24Inst::Inp(r) => day24_setreg(state, r, input),
         Day24Inst::Add(a, b) => {
@@ -2356,9 +2352,7 @@ fn day24_eval(
 }
 
 fn day24_eval_group(state: &Day24State, insts: &Vec<Day24Inst>, input: i64) -> Day24State {
-    insts
-        .iter()
-        .fold(*state, |s, i| day24_eval(&s, *i, input))
+    insts.iter().fold(*state, |s, i| day24_eval(&s, *i, input))
 }
 
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
