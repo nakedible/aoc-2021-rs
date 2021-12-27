@@ -1,6 +1,7 @@
 use cached::proc_macro::cached;
 use pathfinding::directed::astar::astar;
 use petgraph::graphmap::UnGraphMap;
+use slice_group_by::GroupBy;
 use std::cmp::{max, min};
 use std::collections::BTreeMap;
 use std::collections::HashMap;
@@ -53,6 +54,8 @@ fn main() -> Result<(), std::io::Error> {
     println!("day 22 puzzle 2: {}", day22_puzzle2()?);
     println!("day 23 puzzle 1: {}", day23_puzzle1()?);
     println!("day 23 puzzle 2: {}", day23_puzzle2()?);
+    println!("day 24 puzzle 1: {}", day24_puzzle1()?);
+    println!("day 24 puzzle 2: {}", day24_puzzle2()?);
     Ok(())
 }
 
@@ -2240,4 +2243,196 @@ pub fn day23_puzzle2() -> Result<usize, std::io::Error> {
     ];
     let (_path, cost) = astar(&data, |m| day23_moves(&paths, m), |_| 1, day23_done2).unwrap();
     Ok(cost as usize)
+}
+
+#[derive(Copy, Clone, Debug)]
+enum Day24RegVal {
+    W,
+    X,
+    Y,
+    Z,
+    Value(i64),
+}
+
+#[derive(Copy, Clone, Debug)]
+enum Day24Inst {
+    Inp(Day24RegVal),
+    Add(Day24RegVal, Day24RegVal),
+    Mul(Day24RegVal, Day24RegVal),
+    Div(Day24RegVal, Day24RegVal),
+    Mod(Day24RegVal, Day24RegVal),
+    Eql(Day24RegVal, Day24RegVal),
+}
+
+fn day24_parse_regval(r: &str) -> Day24RegVal {
+    match r {
+        "w" => Day24RegVal::W,
+        "x" => Day24RegVal::X,
+        "y" => Day24RegVal::Y,
+        "z" => Day24RegVal::Z,
+        _ => Day24RegVal::Value(r.parse().unwrap()),
+    }
+}
+
+fn day24_read_data(filename: &str) -> Result<Vec<Day24Inst>, std::io::Error> {
+    let data = std::fs::read_to_string(filename)?
+        .lines()
+        .map(|l| {
+            let (i, rest) = l.split_once(" ").unwrap();
+            let (a, b) = rest.split_once(" ").unwrap_or((rest, ""));
+            match i {
+                "inp" => Day24Inst::Inp(day24_parse_regval(a)),
+                "add" => Day24Inst::Add(day24_parse_regval(a), day24_parse_regval(b)),
+                "mul" => Day24Inst::Mul(day24_parse_regval(a), day24_parse_regval(b)),
+                "div" => Day24Inst::Div(day24_parse_regval(a), day24_parse_regval(b)),
+                "mod" => Day24Inst::Mod(day24_parse_regval(a), day24_parse_regval(b)),
+                "eql" => Day24Inst::Eql(day24_parse_regval(a), day24_parse_regval(b)),
+                _ => panic!("invalid input"),
+            }
+        })
+        .collect();
+    Ok(data)
+}
+
+fn day24_groups(data: &Vec<Day24Inst>) -> Vec<Vec<Day24Inst>> {
+    data.linear_group_by(|_a, b| !matches!(b, Day24Inst::Inp(_)))
+        .map(|g| g.to_vec())
+        .collect()
+}
+
+#[derive(Default, Debug, Eq, PartialEq, Clone, Copy, Hash)]
+struct Day24State {
+    w: i64,
+    x: i64,
+    y: i64,
+    z: i64,
+}
+
+fn day24_getreg(state: &Day24State, r: Day24RegVal) -> i64 {
+    match r {
+        Day24RegVal::W => state.w,
+        Day24RegVal::X => state.x,
+        Day24RegVal::Y => state.y,
+        Day24RegVal::Z => state.z,
+        Day24RegVal::Value(v) => v,
+    }
+}
+
+fn day24_setreg(state: &Day24State, r: Day24RegVal, v: i64) -> Day24State {
+    match r {
+        Day24RegVal::W => Day24State { w: v, ..*state },
+        Day24RegVal::X => Day24State { x: v, ..*state },
+        Day24RegVal::Y => Day24State { y: v, ..*state },
+        Day24RegVal::Z => Day24State { z: v, ..*state },
+        Day24RegVal::Value(_) => panic!("invalid input"),
+    }
+}
+
+fn day24_eval(
+    state: &Day24State,
+    inst: Day24Inst,
+    input: i64,
+) -> Day24State {
+    match inst {
+        Day24Inst::Inp(r) => day24_setreg(state, r, input),
+        Day24Inst::Add(a, b) => {
+            day24_setreg(state, a, day24_getreg(state, a) + day24_getreg(state, b))
+        }
+        Day24Inst::Mul(a, b) => {
+            day24_setreg(state, a, day24_getreg(state, a) * day24_getreg(state, b))
+        }
+        Day24Inst::Div(a, b) => {
+            day24_setreg(state, a, day24_getreg(state, a) / day24_getreg(state, b))
+        }
+        Day24Inst::Mod(a, b) => {
+            day24_setreg(state, a, day24_getreg(state, a) % day24_getreg(state, b))
+        }
+        Day24Inst::Eql(a, b) => day24_setreg(
+            state,
+            a,
+            (day24_getreg(state, a) == day24_getreg(state, b)) as i64,
+        ),
+    }
+}
+
+fn day24_eval_group(state: &Day24State, insts: &Vec<Day24Inst>, input: i64) -> Day24State {
+    insts
+        .iter()
+        .fold(*state, |s, i| day24_eval(&s, *i, input))
+}
+
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
+struct Day24PathState {
+    state: Day24State,
+    group: usize,
+    input: i64,
+}
+
+fn day24_succ(data: &Vec<Vec<Day24Inst>>, ps: &Day24PathState) -> Vec<(Day24PathState, i64)> {
+    let mut ret = Vec::new();
+    if ps.group >= data.len() {
+        return ret;
+    }
+    let hasneg = data[ps.group]
+        .iter()
+        .any(|i| matches!(i, Day24Inst::Add(_, Day24RegVal::Value(x)) if *x < 0));
+    for i in (1..=9).rev() {
+        let state = day24_eval_group(&ps.state, &data[ps.group], i);
+        if hasneg && state.x != 0 {
+            // magic happens here
+            continue;
+        }
+        ret.push((
+            Day24PathState {
+                state,
+                group: ps.group + 1,
+                input: (ps.input * 10) + i,
+            },
+            1,
+        ));
+    }
+    ret
+}
+
+fn day24_goal(ps: &Day24PathState) -> bool {
+    ps.group == 14 && ps.state.z == 0
+}
+
+#[inline(never)]
+pub fn day24_puzzle1() -> Result<usize, std::io::Error> {
+    let data = day24_read_data("inputs/input-24")?;
+    let groups = day24_groups(&data);
+    let (path, _cost) = astar(
+        &Day24PathState {
+            state: Day24State::default(),
+            group: 0,
+            input: 0,
+        },
+        |p| day24_succ(&groups, p),
+        |p| 99999999999999 - p.input,
+        |p| day24_goal(p),
+    )
+    .unwrap();
+    //let ret = paths.map(|p| p.last().unwrap().input).max().unwrap();
+    let ret = path.last().unwrap().input;
+    Ok(ret as usize)
+}
+
+#[inline(never)]
+pub fn day24_puzzle2() -> Result<usize, std::io::Error> {
+    let data = day24_read_data("inputs/input-24")?;
+    let groups = day24_groups(&data);
+    let (path, _cost) = astar(
+        &Day24PathState {
+            state: Day24State::default(),
+            group: 0,
+            input: 0,
+        },
+        |p| day24_succ(&groups, p),
+        |p| p.input,
+        |p| day24_goal(p),
+    )
+    .unwrap();
+    let ret = path.last().unwrap().input;
+    Ok(ret as usize)
 }
